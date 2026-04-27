@@ -1,39 +1,13 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TravGuide - Find Your Local Guide</title>
-    <link rel="stylesheet" href="style.css">
-
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-</head>
-<body>
-   <header>
-    <h1>TravGuide</h1>
-    <p>Explore the world with local experts</p>
-    <br>
-    <a href="register.html"><button style="background-color: white; color: var(--primary);">Join as a Guide</button></a>
-</header>
-
-    <main>
-        <section id="search-section">
-            <input type="text" id="citySearch" placeholder="Enter city (e.g. Paris)">
-           <button onclick="fetchGuides(document.getElementById('citySearch').value)">Search Guides</button>
-
-        </section>
-
-        <div id="map" style="height: 400px; width: 90%; margin: 20px auto; border-radius: 12px; z-index: 1;"></div>
-
-
-        <section id="guide-list">
-            <!-- Guides will appear here dynamically -->
-            <p>Loading guides...</p>
-        </section>
-    </main>
-
-    <script src="app.js"></script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>frontend_temp</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
 </html>
