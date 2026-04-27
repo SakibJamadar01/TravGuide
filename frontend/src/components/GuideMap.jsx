@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import Map, { Marker, Popup, NavigationControl } from 'react-map-gl';
+import Map, { Marker, Popup, NavigationControl } from 'react-map-gl/mapbox';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
 // Note: For production, you should get your own free API key from mapbox.com
