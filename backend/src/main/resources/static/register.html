@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Become a Guide - TravGuide</title>
+    <link rel="stylesheet" href="style.css">
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+</head>
+<body>
+    <header>
+        <h1>Become a Local Expert</h1>
+        <p><a href="index.html" style="color: white;">← Back to Home</a></p>
+    </header>
+
+    <main style="max-width: 500px; margin: 2rem auto; background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);">
+        <form id="registerForm">
+            <div style="margin-bottom: 1rem;">
+                <label>Full Name</label><br>
+                <input type="text" id="name" required style="width: 90%;">
+            </div>
+            <div style="margin-bottom: 1rem;">
+                <label>Email</label><br>
+                <input type="email" id="email" required style="width: 90%;">
+            </div>
+            <div style="margin-bottom: 1rem;">
+                <label>City</label><br>
+                <input type="text" id="city" required style="width: 90%;">
+            </div>
+            <div style="margin-bottom: 1rem;">
+                <label>Bio</label><br>
+                <textarea id="bio" required style="width: 90%; height: 100px; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px;"></textarea>
+            </div>
+
+            <div style="margin-bottom: 1rem;">
+    <label>Click on the map to set your location:</label>
+    <div id="picker-map" style="height: 250px; width: 90%; border-radius: 8px; margin-top: 5px;"></div>
+    <input type="hidden" id="lat">
+    <input type="hidden" id="lng">
+</div>
+
+
+            <div style="margin-bottom: 1rem;">
+                <label>Price per Day ($)</label><br>
+                <input type="number" id="price" required style="width: 90%;">
+            </div>
+            <button type="submit" style="width: 100%;">Register as Guide</button>
+        </form>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>

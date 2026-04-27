@@ -1,0 +1,7 @@
+Whenever people travel to a new place, they often struggle to find a reliable local guide who can actually enhance their experience. On the other hand, many local guides don’t have a proper platform to showcase their services.
+
+To solve this, I built a platform that connects tourists with local guides based on location. A tourist can search for any destination, and the system shows available guides in that area along with the services they offer, their pricing, and other details.
+
+At the same time, guides can register themselves on the platform, create their profile, and list different packages like city tours, food tours, or custom experiences with their prices. One key feature I added is a map-based interface where tourists can visually see guides available in a specific location through pins, which makes the experience more interactive and intuitive.
+
+Overall, the goal of this project is to make travel planning easier for tourists while also giving local guides a digital platform to grow their reach and opportunities.

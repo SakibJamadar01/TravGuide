@@ -1,0 +1,34 @@
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.restoreBackup
+.flattened-pom.xml
+dependency-reduced-pom.xml
+build.log
+.incremental/
+.mvn/wrapper/maven-wrapper.jar
+
+# IDEs
+.settings/
+.project
+.classpath
+.factorypath
+.idea/
+*.iml
+*.iws
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Operating System
+Thumbs.db
+Desktop.ini
+
+# Environment
+.env
+.env.local
