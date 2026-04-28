@@ -10,8 +10,8 @@ function App() {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [isRegistering, setIsRegistering] = useState(false);
-    const [mapCenter, setMapCenter] = useState([20.5937, 78.9629]);
-    const [mapZoom, setMapZoom] = useState(5);
+    const [selectedId, setSelectedId] = useState(null);
+    const [mapCenter, setMapCenter] = useState({ lat: 20.5937, lng: 78.9629 });
 
     const loadGuides = async (city = '') => {
         setLoading(true);
@@ -19,8 +19,7 @@ function App() {
             const data = await getGuides(city);
             setGuides(data);
             if (data.length > 0 && data[0].latitude) {
-                setMapCenter([data[0].latitude, data[0].longitude]);
-                setMapZoom(10);
+                setMapCenter({ lat: data[0].latitude, lng: data[0].longitude });
             }
         } catch (error) {
             console.error('Failed to load guides:', error);
@@ -38,49 +37,82 @@ function App() {
         loadGuides(searchTerm);
     };
 
-    if (isRegistering) {
-        return (
-            <RegisterGuide 
-                onRegisterSuccess={() => {
-                    setIsRegistering(false);
-                    loadGuides();
-                }} 
-                onCancel={() => setIsRegistering(false)} 
-            />
-        );
-    }
-
     return (
         <div className="App">
-            <header>
-                <h1>TravGuide</h1>
-                <p>Explore the world with local experts</p>
-                <br />
-                <button 
-                    style={{ backgroundColor: 'white', color: 'var(--primary)' }}
-                    onClick={() => setIsRegistering(true)}
-                >
-                    Join as a Guide
-                </button>
-            </header>
+            {/* Navbar */}
+            <nav className="navbar">
+                <div className="logo">
+                    <span style={{ fontSize: '2rem' }}>🌍</span>
+                    <span>TravGuide</span>
+                </div>
 
-            <main>
-                <section className="search-section">
-                    <form onSubmit={handleSearch} style={{ display: 'flex', width: '100%', gap: '10px' }}>
+                <div className="search-bar-container">
+                    <form onSubmit={handleSearch} className="airbnb-search">
                         <input 
                             type="text" 
-                            placeholder="Enter city (e.g. Paris)" 
+                            placeholder="Start your search" 
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
-                        <button type="submit">Search Guides</button>
+                        <button type="submit" className="search-icon-btn">
+                            <span style={{ fontSize: '14px' }}>🔍</span>
+                        </button>
                     </form>
-                </section>
+                </div>
 
-                <GuideMap guides={guides} center={mapCenter} zoom={mapZoom} />
+                <div className="nav-actions">
+                    <button 
+                        className="btn-secondary"
+                        onClick={() => setIsRegistering(true)}
+                        style={{ borderRadius: '24px', padding: '10px 20px', fontSize: '0.9rem' }}
+                    >
+                        Switch to hosting
+                    </button>
+                </div>
+            </nav>
 
-                <GuideList guides={guides} loading={loading} />
+            {/* Main Content (Split View) */}
+            <main className="main-content">
+                <div className="list-container">
+                    <GuideList 
+                        guides={guides} 
+                        loading={loading} 
+                        selectedId={selectedId}
+                        onSelect={setSelectedId}
+                    />
+                </div>
+
+                <div className="map-container-wrapper">
+                    <GuideMap 
+                        guides={guides} 
+                        selectedId={selectedId}
+                        onSelect={setSelectedId}
+                        center={mapCenter} 
+                        zoom={5} 
+                    />
+                </div>
             </main>
+
+            {/* Registration Overlay */}
+            {isRegistering && (
+                <div className="register-overlay">
+                    <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+                        <button 
+                            className="btn-secondary" 
+                            onClick={() => setIsRegistering(false)}
+                            style={{ marginBottom: '20px' }}
+                        >
+                            ✕ Close
+                        </button>
+                        <RegisterGuide 
+                            onRegisterSuccess={() => {
+                                setIsRegistering(false);
+                                loadGuides();
+                            }} 
+                        />
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

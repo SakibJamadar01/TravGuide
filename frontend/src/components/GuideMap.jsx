@@ -1,73 +1,73 @@
-import React, { useEffect, useState } from 'react';
-import Map, { Marker, Popup, NavigationControl } from 'react-map-gl/mapbox';
-import 'mapbox-gl/dist/mapbox-gl.css';
+import React, { useState } from 'react';
+import { 
+  APIProvider, 
+  Map, 
+  AdvancedMarker, 
+  InfoWindow,
+  Pin
+} from '@vis.gl/react-google-maps';
 
-// Note: For production, you should get your own free API key from mapbox.com
-// This is a placeholder for demonstration
-const MAPBOX_TOKEN = 'pk.eyJ1Ijoic2FraWI3NzciLCJhIjoiY2x3bm16NjljMDBreTJqcXp6NHR6NHR6biJ9.placeholder'; 
+// Get your API key from Google Cloud Console
+// For now, this is a placeholder
+const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
-const GuideMap = ({ guides, center = { lat: 20.5937, lng: 78.9629 }, zoom = 4 }) => {
-    const [viewState, setViewState] = useState({
-        longitude: center.lng,
-        latitude: center.lat,
-        zoom: zoom
-    });
+// Airbnb-like Map Style
+const mapStyle = [
+  { "featureType": "administrative", "elementType": "labels.text.fill", "stylers": [{ "color": "#444444" }] },
+  { "featureType": "landscape", "elementType": "all", "stylers": [{ "color": "#f2f2f2" }] },
+  { "featureType": "poi", "elementType": "all", "stylers": [{ "visibility": "off" }] },
+  { "featureType": "road", "elementType": "all", "stylers": [{ "saturation": -100 }, { "lightness": 45 }] },
+  { "featureType": "road.highway", "elementType": "all", "stylers": [{ "visibility": "simplified" }] },
+  { "featureType": "road.arterial", "elementType": "labels.icon", "stylers": [{ "visibility": "off" }] },
+  { "featureType": "transit", "elementType": "all", "stylers": [{ "visibility": "off" }] },
+  { "featureType": "water", "elementType": "all", "stylers": [{ "color": "#c8d7d4" }, { "visibility": "on" }] }
+];
 
-    const [selectedGuide, setSelectedGuide] = useState(null);
+const GuideMap = ({ guides, selectedId, onSelect, center = { lat: 20.5937, lng: 78.9629 }, zoom = 5 }) => {
+  const [infoWindowData, setInfoWindowData] = useState(null);
 
-    // Update view when center changes (e.g. on search)
-    useEffect(() => {
-        setViewState({
-            longitude: center.lng,
-            latitude: center.lat,
-            zoom: zoom
-        });
-    }, [center, zoom]);
+  return (
+    <APIProvider apiKey={GOOGLE_MAPS_API_KEY}>
+      <Map
+        style={{ width: '100%', height: '100%' }}
+        defaultCenter={center}
+        defaultZoom={zoom}
+        gestureHandling={'greedy'}
+        disableDefaultUI={false}
+        mapId={'bf50473b22538181'} // Use a Map ID for Advanced Markers
+        styles={mapStyle}
+      >
+        {guides.map((guide) => (
+          <AdvancedMarker
+            key={guide.id}
+            position={{ lat: guide.latitude, lng: guide.longitude }}
+            onClick={() => {
+                setInfoWindowData(guide);
+                onSelect(guide.id);
+            }}
+          >
+            <div className={`price-marker ${selectedId === guide.id ? 'selected' : ''}`}>
+              ${guide.pricePerDay}
+            </div>
+          </AdvancedMarker>
+        ))}
 
-    return (
-        <div style={{ height: '400px', width: '90%', margin: '20px auto', borderRadius: '15px', overflow: 'hidden', boxShadow: '0 10px 25px rgba(0,0,0,0.1)', border: '1px solid #e2e8f0' }}>
-            <Map
-                {...viewState}
-                onMove={evt => setViewState(evt.viewState)}
-                mapStyle="mapbox://styles/mapbox/streets-v12"
-                mapboxAccessToken={MAPBOX_TOKEN}
-            >
-                <NavigationControl position="top-right" />
-
-                {guides.map((guide) => (
-                    guide.latitude && guide.longitude && (
-                        <Marker 
-                            key={guide.id} 
-                            longitude={guide.longitude} 
-                            latitude={guide.latitude} 
-                            anchor="bottom"
-                            onClick={e => {
-                                e.originalEvent.stopPropagation();
-                                setSelectedGuide(guide);
-                            }}
-                        >
-                            <div style={{ cursor: 'pointer', fontSize: '24px' }}>📍</div>
-                        </Marker>
-                    )
-                ))}
-
-                {selectedGuide && (
-                    <Popup
-                        anchor="top"
-                        longitude={selectedGuide.longitude}
-                        latitude={selectedGuide.latitude}
-                        onClose={() => setSelectedGuide(null)}
-                    >
-                        <div style={{ padding: '5px' }}>
-                            <h3 style={{ margin: '0 0 5px 0', color: '#2563eb' }}>{selectedGuide.name}</h3>
-                            <p style={{ margin: 0, fontSize: '14px' }}>{selectedGuide.city}</p>
-                            <p style={{ margin: '5px 0 0 0', fontWeight: 'bold' }}>${selectedGuide.pricePerDay}/day</p>
-                        </div>
-                    </Popup>
-                )}
-            </Map>
-        </div>
-    );
+        {infoWindowData && (
+          <InfoWindow
+            position={{ lat: infoWindowData.latitude, lng: infoWindowData.longitude }}
+            onCloseClick={() => setInfoWindowData(null)}
+          >
+            <div className="map-popup-card">
+              <div className="image-placeholder" style={{ height: '100px', marginBottom: '8px' }}></div>
+              <h4 style={{ margin: '0 0 4px 0' }}>{infoWindowData.name}</h4>
+              <p style={{ margin: 0, fontSize: '12px', color: '#717171' }}>{infoWindowData.city}</p>
+              <p style={{ margin: '4px 0 0 0', fontWeight: 'bold' }}>${infoWindowData.pricePerDay}<span> / day</span></p>
+            </div>
+          </InfoWindow>
+        )}
+      </Map>
+    </APIProvider>
+  );
 };
 
 export default GuideMap;

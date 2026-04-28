@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
-import Map, { Marker, NavigationControl } from 'react-map-gl/mapbox';
-import 'mapbox-gl/dist/mapbox-gl.css';
+import { APIProvider, Map, AdvancedMarker } from '@vis.gl/react-google-maps';
 import { createGuide } from '../api/guideApi';
 
-const MAPBOX_TOKEN = 'pk.eyJ1Ijoic2FraWI3NzciLCJhIjoiY2x3bm16NjljMDBreTJqcXp6NHR6NHR6biJ9.placeholder';
+const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
-const RegisterGuide = ({ onRegisterSuccess, onCancel }) => {
+const RegisterGuide = ({ onRegisterSuccess }) => {
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -16,25 +15,20 @@ const RegisterGuide = ({ onRegisterSuccess, onCancel }) => {
         longitude: null
     });
 
-    const [viewState, setViewState] = useState({
-        longitude: 78.9629,
-        latitude: 20.5937,
-        zoom: 4
-    });
-
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
     const handleMapClick = (e) => {
-        const { lng, lat } = e.lngLat;
+        const lat = e.detail.latLng.lat;
+        const lng = e.detail.latLng.lng;
         setFormData({ ...formData, latitude: lat, longitude: lng });
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!formData.latitude || !formData.longitude) {
-            alert('Please select your location on the map');
+            alert('Please click on the map to set your location');
             return;
         }
         try {
@@ -52,57 +46,56 @@ const RegisterGuide = ({ onRegisterSuccess, onCancel }) => {
     };
 
     return (
-        <main className="register-container">
-            <header>
-                <h1>Become a Local Expert</h1>
-                <p onClick={onCancel} style={{ cursor: 'pointer', textDecoration: 'underline' }}>← Back to Home</p>
-            </header>
+        <div className="register-form-box">
+            <h1>Host your expert services</h1>
+            <p style={{ color: '#717171', marginBottom: '24px' }}>Join our community of local guides.</p>
 
-            <form onSubmit={handleSubmit} className="register-form">
+            <form onSubmit={handleSubmit}>
                 <div className="form-group">
-                    <label>Full Name</label>
-                    <input type="text" name="name" value={formData.name} onChange={handleChange} required />
+                    <label>What's your name?</label>
+                    <input type="text" name="name" value={formData.name} onChange={handleChange} required placeholder="Full Name" />
                 </div>
                 <div className="form-group">
-                    <label>Email</label>
-                    <input type="email" name="email" value={formData.email} onChange={handleChange} required />
+                    <label>Email address</label>
+                    <input type="email" name="email" value={formData.email} onChange={handleChange} required placeholder="Email" />
                 </div>
                 <div className="form-group">
-                    <label>City</label>
-                    <input type="text" name="city" value={formData.city} onChange={handleChange} required />
+                    <label>Where are you based?</label>
+                    <input type="text" name="city" value={formData.city} onChange={handleChange} required placeholder="City" />
                 </div>
                 <div className="form-group">
-                    <label>Bio</label>
-                    <textarea name="bio" value={formData.bio} onChange={handleChange} required />
+                    <label>Tell us about your expertise</label>
+                    <textarea name="bio" value={formData.bio} onChange={handleChange} required placeholder="Bio..." />
                 </div>
 
                 <div className="form-group">
-                    <label>Click on the map to set your location:</label>
-                    <div style={{ height: '300px', width: '100%', borderRadius: '8px', overflow: 'hidden', border: '1px solid #e2e8f0', marginTop: '5px' }}>
-                        <Map
-                            {...viewState}
-                            onMove={evt => setViewState(evt.viewState)}
-                            onClick={handleMapClick}
-                            mapStyle="mapbox://styles/mapbox/streets-v12"
-                            mapboxAccessToken={MAPBOX_TOKEN}
-                        >
-                            <NavigationControl position="top-right" />
-                            {formData.latitude && formData.longitude && (
-                                <Marker longitude={formData.longitude} latitude={formData.latitude} anchor="bottom">
-                                    <div style={{ fontSize: '24px' }}>📍</div>
-                                </Marker>
-                            )}
-                        </Map>
+                    <label>Pin your exact location on the map:</label>
+                    <div style={{ height: '300px', width: '100%', borderRadius: '12px', overflow: 'hidden', border: '1px solid #dddddd', marginTop: '10px' }}>
+                        <APIProvider apiKey={GOOGLE_MAPS_API_KEY}>
+                            <Map
+                                defaultCenter={{ lat: 20.5937, lng: 78.9629 }}
+                                defaultZoom={4}
+                                mapId={'bf50473b22538181'}
+                                onClick={handleMapClick}
+                            >
+                                {formData.latitude && (
+                                    <AdvancedMarker position={{ lat: formData.latitude, lng: formData.longitude }} />
+                                )}
+                            </Map>
+                        </APIProvider>
                     </div>
+                    {formData.latitude && (
+                        <p style={{ fontSize: '12px', color: '#059669', marginTop: '5px' }}>✓ Location set: {formData.latitude.toFixed(4)}, {formData.longitude.toFixed(4)}</p>
+                    )}
                 </div>
 
                 <div className="form-group">
-                    <label>Price per Day ($)</label>
-                    <input type="number" name="pricePerDay" value={formData.pricePerDay} onChange={handleChange} required />
+                    <label>Price per day ($)</label>
+                    <input type="number" name="pricePerDay" value={formData.pricePerDay} onChange={handleChange} required placeholder="e.g. 50" />
                 </div>
-                <button type="submit" className="submit-btn">Register as Guide</button>
+                <button type="submit" className="btn-primary" style={{ width: '100%' }}>Complete Registration</button>
             </form>
-        </main>
+        </div>
     );
 };
 
