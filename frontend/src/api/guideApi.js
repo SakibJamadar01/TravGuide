@@ -20,4 +20,22 @@ export const createGuide = async (guideData) => {
     return response.data;
 };
 
+export const uploadIdProof = async (guideId, file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await axios.post(`${API_BASE_URL}/guides/${guideId}/upload-id`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data;
+};
+
+export const uploadSelfie = async (guideId, file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await axios.post(`${API_BASE_URL}/guides/${guideId}/upload-selfie`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data;
+};
+
 export default api;

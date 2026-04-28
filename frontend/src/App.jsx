@@ -4,12 +4,13 @@ import { getGuides } from './api/guideApi';
 import GuideList from './components/GuideList';
 import GuideMap from './components/GuideMap';
 import RegisterGuide from './components/RegisterGuide';
+import LandingPage from './components/LandingPage';
 
 function App() {
+    const [currentView, setCurrentView] = useState('landing');
     const [guides, setGuides] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
-    const [isRegistering, setIsRegistering] = useState(false);
     const [selectedId, setSelectedId] = useState(null);
     const [mapCenter, setMapCenter] = useState({ lat: 20.5937, lng: 78.9629 });
 
@@ -29,60 +30,74 @@ function App() {
     };
 
     useEffect(() => {
-        loadGuides();
-    }, []);
+        if (currentView === 'traveler') {
+            loadGuides();
+        }
+    }, [currentView]);
 
     const handleSearch = (e) => {
         e.preventDefault();
         loadGuides(searchTerm);
     };
 
+    if (currentView === 'landing') {
+        return <LandingPage onSelectMode={setCurrentView} />;
+    }
+
+    if (currentView === 'guide') {
+        return (
+            <RegisterGuide 
+                onRegisterSuccess={() => setCurrentView('traveler')} 
+                onCancel={() => setCurrentView('landing')}
+            />
+        );
+    }
+
     return (
-        <div className="App">
-            {/* Navbar */}
-            <nav className="navbar">
-                <div className="logo">
-                    <span style={{ fontSize: '2rem' }}>🌍</span>
-                    <span>TravGuide</span>
+        <div className="traveler-layout">
+            {/* Top Bar */}
+            <header className="top-bar">
+                <div className="top-bar-left">
+                    <div className="logo-mini" onClick={() => setCurrentView('landing')}>
+                        🌍 TravGuide
+                    </div>
                 </div>
 
-                <div className="search-bar-container">
-                    <form onSubmit={handleSearch} className="airbnb-search">
-                        <input 
-                            type="text" 
-                            placeholder="Start your search" 
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                        <button type="submit" className="search-icon-btn">
-                            <span style={{ fontSize: '14px' }}>🔍</span>
-                        </button>
-                    </form>
-                </div>
-
-                <div className="nav-actions">
-                    <button 
-                        className="btn-secondary"
-                        onClick={() => setIsRegistering(true)}
-                        style={{ borderRadius: '24px', padding: '10px 20px', fontSize: '0.9rem' }}
-                    >
-                        Switch to hosting
-                    </button>
-                </div>
-            </nav>
-
-            {/* Main Content (Split View) */}
-            <main className="main-content">
-                <div className="list-container">
-                    <GuideList 
-                        guides={guides} 
-                        loading={loading} 
-                        selectedId={selectedId}
-                        onSelect={setSelectedId}
+                <form onSubmit={handleSearch} className="search-form">
+                    <input 
+                        type="text" 
+                        className="search-input"
+                        placeholder="Search by city..." 
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
                     />
-                </div>
+                    <button type="submit" className="search-btn">Search</button>
+                </form>
 
-                <div className="map-container-wrapper">
+                <button className="host-btn" onClick={() => setCurrentView('guide')}>
+                    Become a Guide
+                </button>
+            </header>
+
+            {/* Split Content */}
+            <div className="split-content">
+                {/* Left: Guide List */}
+                <aside className="sidebar">
+                    <div className="sidebar-header">
+                        <h2>{guides.length} guides available</h2>
+                    </div>
+                    <div className="sidebar-list">
+                        <GuideList 
+                            guides={guides} 
+                            loading={loading} 
+                            selectedId={selectedId}
+                            onSelect={setSelectedId}
+                        />
+                    </div>
+                </aside>
+
+                {/* Right: Map */}
+                <div className="map-area">
                     <GuideMap 
                         guides={guides} 
                         selectedId={selectedId}
@@ -91,28 +106,7 @@ function App() {
                         zoom={5} 
                     />
                 </div>
-            </main>
-
-            {/* Registration Overlay */}
-            {isRegistering && (
-                <div className="register-overlay">
-                    <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-                        <button 
-                            className="btn-secondary" 
-                            onClick={() => setIsRegistering(false)}
-                            style={{ marginBottom: '20px' }}
-                        >
-                            ✕ Close
-                        </button>
-                        <RegisterGuide 
-                            onRegisterSuccess={() => {
-                                setIsRegistering(false);
-                                loadGuides();
-                            }} 
-                        />
-                    </div>
-                </div>
-            )}
+            </div>
         </div>
     );
 }
