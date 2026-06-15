@@ -21,6 +21,15 @@
     --coral: #FF653F;
     --gold: #FFC85C;
     --text-main: #1e293b;
+    
+    /* Earthy Theme Variables */
+    --lp-bg: #F7F1DE;
+    --lp-primary: #9D6638;
+    --lp-secondary: #B0BA99;
+    --lp-text-dark: #3E2411;
+    --lp-text-muted: #6C5544;
+    --lp-card-glass: rgba(255, 255, 255, 0.45);
+    --lp-card-border: rgba(157, 102, 56, 0.15);
 }
 
 * { box-sizing: border-box; }
