@@ -29,6 +29,9 @@ const RegisterGuide = ({ onRegisterSuccess, onCancel }) => {
         latitude: null,
         longitude: null
     });
+    const [firstName, setFirstName] = useState('');
+    const [lastName, setLastName] = useState('');
+    const [signUpSubStep, setSignUpSubStep] = useState('initial'); // 'initial' or 'details'
     const [idProofFile, setIdProofFile] = useState(null);
     const [selfieFile, setSelfieFile] = useState(null);
     const [idProofPreview, setIdProofPreview] = useState(null);
@@ -37,6 +40,7 @@ const RegisterGuide = ({ onRegisterSuccess, onCancel }) => {
     const [verificationCode, setVerificationCode] = useState('');
     const [awaitingConfirmation, setAwaitingConfirmation] = useState(false);
     const [authError, setAuthError] = useState('');
+
 
     // Fetch existing profile if already logged in via Clerk
     useEffect(() => {
@@ -124,6 +128,9 @@ const RegisterGuide = ({ onRegisterSuccess, onCancel }) => {
                 latitude: null,
                 longitude: null
             });
+            setFirstName('');
+            setLastName('');
+            setSignUpSubStep('initial');
             setIdProofFile(null);
             setSelfieFile(null);
             setIdProofPreview(null);
@@ -162,9 +169,20 @@ const RegisterGuide = ({ onRegisterSuccess, onCancel }) => {
         setFormData({ ...formData, latitude: lat, longitude: lng });
     };
 
+    const handleProceedToDetails = () => {
+        if (!formData.email.trim()) { setAuthError('Email is required'); return; }
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(formData.email.trim())) { setAuthError('Please enter a valid email address'); return; }
+        if (!firstName.trim()) { setAuthError('First name is required'); return; }
+        if (!lastName.trim()) { setAuthError('Last name is required'); return; }
+        setAuthError('');
+        setSignUpSubStep('details');
+    };
+
     // Step 1: Register with Clerk
     const handleClerkSignUp = async () => {
-        if (!formData.name.trim()) { setAuthError('Full name is required'); return; }
+        if (!firstName.trim()) { setAuthError('First name is required'); return; }
+        if (!lastName.trim()) { setAuthError('Last name is required'); return; }
         if (!formData.email.trim()) { setAuthError('Email is required'); return; }
         if (!formData.password || formData.password.length < 8) { setAuthError('Password must be at least 8 characters'); return; }
         if (!formData.dateOfBirth) { setAuthError('Date of birth is required'); return; }
@@ -181,8 +199,8 @@ const RegisterGuide = ({ onRegisterSuccess, onCancel }) => {
             await signUp.create({
                 emailAddress: formData.email,
                 password: formData.password,
-                firstName: formData.name.split(' ')[0],
-                lastName: formData.name.split(' ').slice(1).join(' ') || undefined
+                firstName: firstName.trim(),
+                lastName: lastName.trim()
             });
             await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
             setAwaitingConfirmation(true);
@@ -246,6 +264,7 @@ const RegisterGuide = ({ onRegisterSuccess, onCancel }) => {
         try {
             const guide = await createGuide({
                 ...formData,
+                name: `${firstName.trim()} ${lastName.trim()}`,
                 pricePerDay: parseFloat(formData.pricePerDay),
                 rating: 5.0
             });
@@ -434,63 +453,129 @@ const RegisterGuide = ({ onRegisterSuccess, onCancel }) => {
                 {/* Step 1: Clerk Sign-Up */}
                 {step === 1 && !awaitingConfirmation && !isLoginMode && (
                     <div className="reg-card-inner">
-                        <div className="reg-card-header">
-                            <span className="reg-tag">Step 1 of 3 — Account</span>
-                            <h1>Create your account</h1>
-                            <p>Secured by Clerk.</p>
-                        </div>
-                        <div className="reg-fields">
-                            <div className="reg-field">
-                                <label>Full Name (as per ID) <span className="req">*</span></label>
-                                <input type="text" name="name" value={formData.name} onChange={handleChange} placeholder="Your legal full name" autoFocus />
-                            </div>
-                            <div className="reg-field">
-                                <label>Email <span className="req">*</span></label>
-                                <input type="email" name="email" value={formData.email} onChange={handleChange} placeholder="you@email.com" />
-                            </div>
-                            <div className="reg-field">
-                                <label>Password <span className="req">*</span></label>
-                                <input type="password" name="password" value={formData.password} onChange={handleChange} placeholder="Min 8 characters" />
-                            </div>
-                            <div className="reg-row">
-                                <div className="reg-field">
-                                    <label>Date of Birth <span className="req">*</span></label>
-                                    <input type="date" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} />
+                        {signUpSubStep === 'initial' ? (
+                            <>
+                                <div className="reg-card-header">
+                                    <span className="reg-tag">Step 1 of 3 — Account</span>
+                                    <h1>Create your account</h1>
+                                    <p>Secured by Clerk.</p>
                                 </div>
-                                <div className="reg-field">
-                                    <label>Gender <span className="req">*</span></label>
-                                    <select name="gender" value={formData.gender} onChange={handleChange}>
-                                        <option value="">Select</option>
-                                        <option value="MALE">Male</option>
-                                        <option value="FEMALE">Female</option>
-                                        <option value="OTHER">Other</option>
-                                    </select>
+                                <div className="reg-fields">
+                                    <div className="reg-field">
+                                        <label>Work email <span className="req">*</span></label>
+                                        <input 
+                                            type="email" 
+                                            name="email" 
+                                            value={formData.email} 
+                                            onChange={handleChange} 
+                                            placeholder="you@email.com" 
+                                            autoFocus 
+                                        />
+                                    </div>
+                                    <div className="reg-row">
+                                        <div className="reg-field">
+                                            <label>First name <span className="req">*</span></label>
+                                            <input 
+                                                type="text" 
+                                                value={firstName} 
+                                                onChange={(e) => { setFirstName(e.target.value); setAuthError(''); }} 
+                                                placeholder="First name" 
+                                            />
+                                        </div>
+                                        <div className="reg-field">
+                                            <label>Last name <span className="req">*</span></label>
+                                            <input 
+                                                type="text" 
+                                                value={lastName} 
+                                                onChange={(e) => { setLastName(e.target.value); setAuthError(''); }} 
+                                                placeholder="Last name" 
+                                            />
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                            <div className="reg-field">
-                                <label>Mobile Number <span className="req">*</span></label>
-                                <input type="tel" name="mobileNumber" value={formData.mobileNumber} onChange={handleChange} placeholder="+919876543210" />
-                                <span className="reg-loc-hint">Include country code (e.g. +91)</span>
-                            </div>
-                        </div>
-                        {/* Clerk Captcha Placeholder for Bot Protection */}
-                        <div id="clerk-captcha"></div>
-                        <button className="reg-next-btn" onClick={handleClerkSignUp} disabled={isSubmitting}>
-                            {isSubmitting ? (
-                                <div className="btn-loading-content">
-                                    <span className="spinner"></span>
-                                    <span>Creating Account...</span>
+                                <p style={{ fontSize: '0.8rem', color: 'var(--lp-text-muted)', lineHeight: '1.4', margin: '0 0 16px 0' }}>
+                                    By signing up, you agree to TravGuide's <a href="#terms" style={{ color: 'var(--lp-primary)', fontWeight: '600' }}>terms of service</a> and <a href="#privacy" style={{ color: 'var(--lp-primary)', fontWeight: '600' }}>privacy policy</a>.
+                                </p>
+                                <button type="button" className="reg-next-btn" onClick={handleProceedToDetails}>
+                                    Get started for free
+                                </button>
+                                <p className="auth-toggle-link" style={{ textAlign: 'center', marginTop: '16px', color: 'var(--lp-text-muted)', fontSize: '0.85rem' }}>
+                                    Already have an account?{' '}
+                                    <span onClick={() => { setIsLoginMode(true); setAuthError(''); }} style={{ color: 'var(--lp-primary)', cursor: 'pointer', fontWeight: 'bold', textDecoration: 'underline' }}>
+                                        Sign In
+                                    </span>
+                                </p>
+                            </>
+                        ) : (
+                            <>
+                                <div className="reg-card-header">
+                                    <span className="reg-tag">Step 1 of 3 — Details</span>
+                                    <h1>A few more details</h1>
+                                    <p>Let's complete your secure credentials.</p>
                                 </div>
-                            ) : (
-                                'Create Account & Verify →'
-                            )}
-                        </button>
-                        <p className="auth-toggle-link" style={{ textAlign: 'center', marginTop: '20px', color: 'var(--lp-text-muted)', fontSize: '0.9rem' }}>
-                            Already have an account?{' '}
-                            <span onClick={() => { setIsLoginMode(true); setAuthError(''); }} style={{ color: 'var(--lp-primary)', cursor: 'pointer', fontWeight: 'bold', textDecoration: 'underline' }}>
-                                Sign In
-                            </span>
-                        </p>
+                                <div className="reg-fields">
+                                    <div className="reg-field">
+                                        <label>Password <span className="req">*</span></label>
+                                        <input 
+                                            type="password" 
+                                            name="password" 
+                                            value={formData.password} 
+                                            onChange={handleChange} 
+                                            placeholder="Min 8 characters" 
+                                            autoFocus 
+                                        />
+                                    </div>
+                                    <div className="reg-row">
+                                        <div className="reg-field">
+                                            <label>Date of Birth <span className="req">*</span></label>
+                                            <input 
+                                                type="date" 
+                                                name="dateOfBirth" 
+                                                value={formData.dateOfBirth} 
+                                                onChange={handleChange} 
+                                            />
+                                        </div>
+                                        <div className="reg-field">
+                                            <label>Gender <span className="req">*</span></label>
+                                            <select name="gender" value={formData.gender} onChange={handleChange}>
+                                                <option value="">Select</option>
+                                                <option value="MALE">Male</option>
+                                                <option value="FEMALE">Female</option>
+                                                <option value="OTHER">Other</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div className="reg-field">
+                                        <label>Mobile Number <span className="req">*</span></label>
+                                        <input 
+                                            type="tel" 
+                                            name="mobileNumber" 
+                                            value={formData.mobileNumber} 
+                                            onChange={handleChange} 
+                                            placeholder="+919876543210" 
+                                        />
+                                        <span className="reg-loc-hint">Include country code (e.g. +91)</span>
+                                    </div>
+                                </div>
+                                {/* Clerk Captcha Placeholder for Bot Protection */}
+                                <div id="clerk-captcha"></div>
+                                <div className="reg-btn-row">
+                                    <button type="button" className="reg-back-step" onClick={() => setSignUpSubStep('initial')}>
+                                        ← Back
+                                    </button>
+                                    <button type="button" className="reg-submit-btn" onClick={handleClerkSignUp} disabled={isSubmitting}>
+                                        {isSubmitting ? (
+                                            <div className="btn-loading-content">
+                                                <span className="spinner"></span>
+                                                <span>Creating Account...</span>
+                                            </div>
+                                        ) : (
+                                            'Create Account & Verify →'
+                                        )}
+                                    </button>
+                                </div>
+                            </>
+                        )}
                     </div>
                 )}
 
