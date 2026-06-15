@@ -15,6 +15,11 @@ export const getGuides = async (city = '') => {
     return response.data;
 };
 
+export const getGuideByEmail = async (email) => {
+    const response = await api.get(`/guides/by-email?email=${encodeURIComponent(email)}`);
+    return response.data;
+};
+
 export const createGuide = async (guideData) => {
     const response = await api.post('/guides', guideData);
     return response.data;

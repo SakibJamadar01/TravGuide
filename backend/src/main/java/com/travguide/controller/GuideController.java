@@ -45,6 +45,14 @@ public class GuideController {
         return guideRepository.findByCityContainingIgnoreCase(city);
     }
 
+    @GetMapping("/by-email")
+    public ResponseEntity<?> getGuideByEmail(@RequestParam String email) {
+        return guideRepository.findByEmail(email)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+
     // Upload ID Proof document
     @PostMapping("/{id}/upload-id")
     public ResponseEntity<?> uploadIdProof(@PathVariable Long id, @RequestParam("file") MultipartFile file) {

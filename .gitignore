@@ -36,3 +36,7 @@ Desktop.ini
 # Node
 node_modules/
 dist/
+
+#Folder
+Img/
+fonts/
