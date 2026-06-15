@@ -162,27 +162,59 @@ const LandingPage = ({ onSelectMode }) => {
 
             {/* Footer Section */}
             <footer className="landing-footer">
-                <div className="footer-top">
-                    <div className="footer-brand">
-                        <h4>🌍 TravGuide</h4>
-                        <p>Connecting tourists with passionate local guides around the globe.</p>
+                <div className="footer-inner">
+                    <div className="footer-brand-col">
+                        <div className="footer-logo">
+                            <img src={travGuideLogo} alt="TravGuide Logo" className="footer-logo-img" />
+                            <span>TravGuide</span>
+                        </div>
+                        <p className="footer-tagline">
+                            Unlocking authentic local experiences, customized tours, and trusted connections in every destination.
+                        </p>
+                        <div className="footer-socials">
+                            <a href="#facebook" className="social-icon-btn">FB</a>
+                            <a href="#instagram" className="social-icon-btn">IG</a>
+                            <a href="#twitter" className="social-icon-btn">TW</a>
+                            <a href="#linkedin" className="social-icon-btn">LN</a>
+                        </div>
                     </div>
-                    <div className="footer-links">
-                        <h5>Platform</h5>
-                        <span onClick={() => onSelectMode('how-it-works')}>How it Works</span>
-                        <span onClick={() => onSelectMode('features')}>Features</span>
-                        <span onClick={() => onSelectMode('traveler')}>Explore Map</span>
-                        <span onClick={() => onSelectMode('guide')}>Guide Portal</span>
+
+                    <div className="footer-nav-col">
+                        <h5>Explore</h5>
+                        <ul className="footer-nav-links">
+                            <li><a href="#how-it-works">How It Works</a></li>
+                            <li><a href="#features">Features</a></li>
+                            <li><span onClick={() => onSelectMode('traveler')}>Find Local Guides</span></li>
+                        </ul>
                     </div>
-                    <div className="footer-support">
-                        <h5>Support</h5>
-                        <p>Email: support@travguide.com</p>
-                        <p>Verified Secure System</p>
+
+                    <div className="footer-nav-col">
+                        <h5>For Experts</h5>
+                        <ul className="footer-nav-links">
+                            <li><span onClick={() => onSelectMode('guide')}>Become a Guide</span></li>
+                            <li><a href="#safety">Trust & Safety</a></li>
+                            <li><span onClick={() => onSelectMode('guide')}>Guide Portal</span></li>
+                        </ul>
+                    </div>
+
+                    <div className="footer-subscribe-col">
+                        <h5>Get Travel Stories</h5>
+                        <p>Receive curated local itineraries and destination highlights directly in your inbox.</p>
+                        <form className="footer-subscribe-form" onSubmit={(e) => e.preventDefault()}>
+                            <input type="email" placeholder="Your email address" required />
+                            <button type="submit">Join</button>
+                        </form>
                     </div>
                 </div>
+
                 <hr className="footer-divider" />
-                <div className="footer-bottom">
-                    <p>&copy; {new Date().getFullYear()} TravGuide. All rights reserved.</p>
+
+                <div className="footer-bottom-row">
+                    <p className="copyright">&copy; {new Date().getFullYear()} TravGuide. All rights reserved.</p>
+                    <div className="footer-bottom-meta">
+                        <a href="#privacy">Privacy Policy</a>
+                        <a href="#terms">Terms of Service</a>
+                    </div>
                 </div>
             </footer>
         </div>
