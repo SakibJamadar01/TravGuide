@@ -402,11 +402,14 @@ body {
     text-align: left; /* Aligns text lines to the left */
     position: relative;
     overflow: hidden;
-    padding: 80px 8%; /* Increased left/right padding for elegant layout framing */
+    padding: 80px 8%; /* Left/right padding for elegant layout framing */
+    margin: 30px 5% 0 5%; /* Adds margins so the curvy corner borders are visible */
+    border-radius: 32px; /* Very curvy corner radius for the hero section box */
     background-image: url('../assets/Background.png');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
 }
 
 .hero-section::before {
@@ -456,14 +459,6 @@ body {
 .hero-content {
     max-width: 650px; /* Reduced width to neatly float on the left side */
     z-index: 3; /* Sits on the very top */
-    background: rgba(30, 16, 78, 0.45); /* Premium translucent dark glass card */
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1.5px solid rgba(255, 255, 255, 0.12);
-    border-radius: 32px; /* Curvy border radius */
-    padding: 45px 50px;
-    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.35);
-    box-sizing: border-box;
 }
 
 .hero-badge {
@@ -911,14 +906,14 @@ body {
     .hero-section {
         justify-content: center;
         text-align: center;
-        padding: 80px 16px;
+        padding: 80px 24px;
+        margin: 20px 16px 0 16px; /* Rounded box layout margins on mobile */
+        border-radius: 24px; /* Curvy hero container on mobile */
+        min-height: 60vh;
     }
 
     .hero-content {
-        padding: 35px 24px;
-        border-radius: 24px; /* Slightly less curvy for smaller screen width ratios */
         max-width: 100%;
-        margin: 0;
     }
 
     .hero-content h1 {
