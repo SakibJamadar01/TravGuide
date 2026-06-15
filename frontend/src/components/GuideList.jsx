@@ -2,7 +2,25 @@ import React from 'react';
 
 const GuideList = ({ guides, loading, selectedId, onSelect }) => {
     if (loading) {
-        return <div className="list-message">Finding guides...</div>;
+        return (
+            <>
+                {[1, 2, 3].map((n) => (
+                    <div key={n} className="guide-card skeleton">
+                        <div className="card-top">
+                            <div className="skeleton-text title"></div>
+                            <div className="skeleton-text rating"></div>
+                        </div>
+                        <div className="skeleton-text city"></div>
+                        <div className="skeleton-text bio-line-1"></div>
+                        <div className="skeleton-text bio-line-2"></div>
+                        <div className="card-bottom">
+                            <div className="skeleton-text price"></div>
+                            <div className="skeleton-btn"></div>
+                        </div>
+                    </div>
+                ))}
+            </>
+        );
     }
     
     if (guides.length === 0) {
