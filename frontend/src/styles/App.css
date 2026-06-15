@@ -456,6 +456,14 @@ body {
 .hero-content {
     max-width: 650px; /* Reduced width to neatly float on the left side */
     z-index: 3; /* Sits on the very top */
+    background: rgba(30, 16, 78, 0.45); /* Premium translucent dark glass card */
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1.5px solid rgba(255, 255, 255, 0.12);
+    border-radius: 32px; /* Curvy border radius */
+    padding: 45px 50px;
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.35);
+    box-sizing: border-box;
 }
 
 .hero-badge {
@@ -903,7 +911,14 @@ body {
     .hero-section {
         justify-content: center;
         text-align: center;
-        padding: 80px 24px;
+        padding: 80px 16px;
+    }
+
+    .hero-content {
+        padding: 35px 24px;
+        border-radius: 24px; /* Slightly less curvy for smaller screen width ratios */
+        max-width: 100%;
+        margin: 0;
     }
 
     .hero-content h1 {
