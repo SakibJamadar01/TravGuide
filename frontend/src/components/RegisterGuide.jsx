@@ -422,9 +422,9 @@ const RegisterGuide = ({ onRegisterSuccess, onCancel }) => {
                                 'Sign In →'
                             )}
                         </button>
-                        <p className="auth-toggle-link" style={{ textAlign: 'center', marginTop: '20px', color: 'rgba(255,255,255,0.6)', fontSize: '0.9rem' }}>
+                        <p className="auth-toggle-link" style={{ textAlign: 'center', marginTop: '20px', color: 'var(--lp-text-muted)', fontSize: '0.9rem' }}>
                             New here?{' '}
-                            <span onClick={() => { setIsLoginMode(false); setAuthError(''); }} style={{ color: 'var(--coral)', cursor: 'pointer', fontWeight: 'bold', textDecoration: 'underline' }}>
+                            <span onClick={() => { setIsLoginMode(false); setAuthError(''); }} style={{ color: 'var(--lp-primary)', cursor: 'pointer', fontWeight: 'bold', textDecoration: 'underline' }}>
                                 Register as a Guide
                             </span>
                         </p>
@@ -485,9 +485,9 @@ const RegisterGuide = ({ onRegisterSuccess, onCancel }) => {
                                 'Create Account & Verify →'
                             )}
                         </button>
-                        <p className="auth-toggle-link" style={{ textAlign: 'center', marginTop: '20px', color: 'rgba(255,255,255,0.6)', fontSize: '0.9rem' }}>
+                        <p className="auth-toggle-link" style={{ textAlign: 'center', marginTop: '20px', color: 'var(--lp-text-muted)', fontSize: '0.9rem' }}>
                             Already have an account?{' '}
-                            <span onClick={() => { setIsLoginMode(true); setAuthError(''); }} style={{ color: 'var(--coral)', cursor: 'pointer', fontWeight: 'bold', textDecoration: 'underline' }}>
+                            <span onClick={() => { setIsLoginMode(true); setAuthError(''); }} style={{ color: 'var(--lp-primary)', cursor: 'pointer', fontWeight: 'bold', textDecoration: 'underline' }}>
                                 Sign In
                             </span>
                         </p>
