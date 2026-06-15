@@ -1193,7 +1193,7 @@ body {
    ========================================= */
 .reg-page {
     position: relative;
-    min-height: 100vh;
+    height: 100vh;
     width: 100%; /* Avoid 100vw to prevent horizontal scrollbar */
     background: #F7F1DE; /* Earthy beige background */
     display: flex;
@@ -1203,7 +1203,7 @@ body {
     overflow-y: auto;
     overflow-x: hidden;
     box-sizing: border-box;
-    padding: 30px 20px 20px 20px;
+    padding: 40px 20px;
 }
 
 .reg-ambient-orb {
