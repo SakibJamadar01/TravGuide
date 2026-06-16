@@ -170,6 +170,12 @@ const RegisterGuide = ({ onRegisterSuccess, onCancel }) => {
         }
     };
 
+    const isVideoFile = (fileName) => {
+        if (!fileName) return false;
+        const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov', '.quicktime'];
+        return videoExtensions.some(ext => fileName.toLowerCase().endsWith(ext));
+    };
+
     const handleNextImage = (postId, totalImages) => {
         setPostCarouselIndices(prev => {
             const current = prev[postId] || 0;
@@ -259,7 +265,7 @@ const RegisterGuide = ({ onRegisterSuccess, onCancel }) => {
             if (tagsInput) tagsInput.value = "";
             const promptElement = document.getElementById('fileUploadPrompt');
             if (promptElement) {
-                promptElement.textContent = 'Click to select photos';
+                promptElement.textContent = 'Click to select photos or videos';
                 promptElement.style.color = 'var(--lp-text-dark)';
             }
         } catch (error) {
@@ -982,7 +988,7 @@ const RegisterGuide = ({ onRegisterSuccess, onCancel }) => {
                                         
                                         <form onSubmit={handlePostUpload} style={{ marginBottom: '40px', background: 'rgba(157, 102, 56, 0.05)', padding: '20px', borderRadius: '12px', border: '1px dashed rgba(157, 102, 56, 0.3)' }}>
                                             <div className="reg-field" style={{ marginBottom: '20px' }}>
-                                                 <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600 }}>Select Photo(s) <span className="req">*</span></label>
+                                                 <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600 }}>Select Photo(s) / Video(s) <span className="req">*</span></label>
                                                  <div 
                                                      style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', border: '2px dashed rgba(157, 102, 56, 0.25)', padding: '28px', borderRadius: '12px', background: '#fff', cursor: 'pointer', transition: 'all 0.2s', textAlign: 'center' }} 
                                                      onClick={() => document.getElementById('postImageInput').click()}
@@ -995,16 +1001,16 @@ const RegisterGuide = ({ onRegisterSuccess, onCancel }) => {
                                                          <line x1="12" y1="3" x2="12" y2="15"/>
                                                      </svg>
                                                      <span id="fileUploadPrompt" style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--lp-text-dark)' }}>
-                                                         Click to select photos
+                                                         Click to select photos or videos
                                                      </span>
                                                      <span style={{ fontSize: '0.75rem', color: 'var(--lp-text-muted)', marginTop: '4px' }}>
-                                                         You can select multiple files at once (JPG, PNG, WEBP)
+                                                         You can select multiple files at once (Images or Videos up to 400MB)
                                                      </span>
                                                      <input 
                                                          type="file" 
                                                          id="postImageInput"
                                                          name="postImage" 
-                                                         accept="image/*" 
+                                                         accept="image/*,video/*" 
                                                          multiple 
                                                          required 
                                                          style={{ display: 'none' }} 
@@ -1012,10 +1018,10 @@ const RegisterGuide = ({ onRegisterSuccess, onCancel }) => {
                                                              const files = e.target.files;
                                                              const prompt = document.getElementById('fileUploadPrompt');
                                                              if (files && files.length > 0) {
-                                                                 prompt.textContent = `${files.length} photo(s) selected`;
+                                                                 prompt.textContent = `${files.length} media file(s) selected`;
                                                                  prompt.style.color = 'var(--lp-primary)';
                                                              } else {
-                                                                 prompt.textContent = 'Click to select photos';
+                                                                 prompt.textContent = 'Click to select photos or videos';
                                                                  prompt.style.color = 'var(--lp-text-dark)';
                                                              }
                                                          }}
@@ -1103,13 +1109,22 @@ const RegisterGuide = ({ onRegisterSuccess, onCancel }) => {
                                                             {/* Post Image Slide */}
                                                             <div style={{ position: 'relative', width: '100%', height: '280px', background: '#f5f5f5', overflow: 'hidden' }}>
                                                                 {currentImage ? (
-                                                                    <img 
-                                                                        src={`http://localhost:8080/api/guides/files/${currentImage}`} 
-                                                                        alt="Post Slide" 
-                                                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-                                                                    />
+                                                                    isVideoFile(currentImage) ? (
+                                                                        <video 
+                                                                            src={`http://localhost:8080/api/guides/files/${currentImage}`} 
+                                                                            controls 
+                                                                            playsInline
+                                                                            style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                                                                        />
+                                                                    ) : (
+                                                                        <img 
+                                                                            src={`http://localhost:8080/api/guides/files/${currentImage}`} 
+                                                                            alt="Post Slide" 
+                                                                            style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                                                                        />
+                                                                    )
                                                                 ) : (
-                                                                    <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#999' }}>No Image</div>
+                                                                    <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#999' }}>No Media</div>
                                                                 )}
 
                                                                 {images.length > 1 && (
