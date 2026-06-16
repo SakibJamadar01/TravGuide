@@ -161,27 +161,38 @@ public class GuideController {
         }).orElse(ResponseEntity.notFound().build());
     }
 
-    // Upload a new post/image to gallery (batch upload)
+    // Upload a new post to gallery (Instagram style - multiple images, tags, captions)
     @PostMapping("/{id}/posts")
     public ResponseEntity<?> createPost(
             @PathVariable Long id, 
             @RequestParam("files") MultipartFile[] files, 
             @RequestParam(value = "location", required = false) String location,
-            @RequestParam(value = "caption", required = false) String caption) {
+            @RequestParam(value = "caption", required = false) String caption,
+            @RequestParam(value = "tags", required = false) String tags) {
             
         return guideRepository.findById(id).map(guide -> {
             try {
+                StringBuilder imageUrlsBuilder = new StringBuilder();
                 for (MultipartFile file : files) {
                     if (file.isEmpty()) continue;
                     String fileName = saveFile(file, "gallery-posts");
-                    GuidePost post = new GuidePost();
-                    post.setGuide(guide);
-                    post.setImageUrl(fileName);
-                    if (caption != null) post.setCaption(caption);
-                    if (location != null) post.setLocation(location);
-                    guidePostRepository.save(post);
+                    if (imageUrlsBuilder.length() > 0) imageUrlsBuilder.append(",");
+                    imageUrlsBuilder.append(fileName);
                 }
-                return ResponseEntity.ok(Map.of("message", "Posts uploaded successfully"));
+                
+                if (imageUrlsBuilder.length() == 0) {
+                    return ResponseEntity.badRequest().body(Map.of("error", "At least one image is required"));
+                }
+                
+                GuidePost post = new GuidePost();
+                post.setGuide(guide);
+                post.setImageUrls(imageUrlsBuilder.toString());
+                if (caption != null) post.setCaption(caption);
+                if (location != null) post.setLocation(location);
+                if (tags != null) post.setTags(tags);
+                
+                guidePostRepository.save(post);
+                return ResponseEntity.ok(Map.of("message", "Post created successfully", "postId", post.getId()));
             } catch (IOException e) {
                 return ResponseEntity.internalServerError().body(Map.of("error", "Upload failed"));
             }
@@ -193,6 +204,16 @@ public class GuideController {
     public ResponseEntity<List<GuidePost>> getPosts(@PathVariable Long id) {
         List<GuidePost> posts = guidePostRepository.findByGuideIdOrderByCreatedAtDesc(id);
         return ResponseEntity.ok(posts);
+    }
+
+    // Like a post
+    @PostMapping("/posts/{postId}/like")
+    public ResponseEntity<?> likePost(@PathVariable Long postId) {
+        return guidePostRepository.findById(postId).map(post -> {
+            post.setLikesCount(post.getLikesCount() + 1);
+            guidePostRepository.save(post);
+            return ResponseEntity.ok(Map.of("likesCount", post.getLikesCount()));
+        }).orElse(ResponseEntity.notFound().build());
     }
 
     // Upload destination images

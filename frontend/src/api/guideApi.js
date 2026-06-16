@@ -72,7 +72,7 @@ export const uploadProfilePicture = async (guideId, file) => {
     return response.data;
 };
 
-export const uploadGuidePost = async (guideId, files, location = '', caption = '') => {
+export const uploadGuidePost = async (guideId, files, location = '', caption = '', tags = '') => {
     const formData = new FormData();
     
     // Append multiple files
@@ -86,6 +86,9 @@ export const uploadGuidePost = async (guideId, files, location = '', caption = '
     if (caption) {
         formData.append('caption', caption);
     }
+    if (tags) {
+        formData.append('tags', tags);
+    }
     const response = await axios.post(`${API_BASE_URL}/guides/${guideId}/posts`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
     });
@@ -94,6 +97,11 @@ export const uploadGuidePost = async (guideId, files, location = '', caption = '
 
 export const getGuidePosts = async (guideId) => {
     const response = await api.get(`/guides/${guideId}/posts`);
+    return response.data;
+};
+
+export const likeGuidePost = async (postId) => {
+    const response = await api.post(`/guides/posts/${postId}/like`);
     return response.data;
 };
 

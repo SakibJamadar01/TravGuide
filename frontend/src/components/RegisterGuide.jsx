@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { createGuide, updateGuide, getGuideByEmail, createVerificationSession, getVerificationStatus, resetVerification, uploadProfilePicture, uploadGuidePost, getGuidePosts, uploadDestinationImages, deleteDestinationImage } from '../api/guideApi';
+import { createGuide, updateGuide, getGuideByEmail, createVerificationSession, getVerificationStatus, resetVerification, uploadProfilePicture, uploadGuidePost, getGuidePosts, uploadDestinationImages, deleteDestinationImage, likeGuidePost } from '../api/guideApi';
 import { useSignUp, useSignIn, useAuth, useUser } from '@clerk/clerk-react';
 import { DiditSdk } from '@didit-protocol/sdk-web';
 import travGuideLogo from '../assets/TravGuideLogo.png';
@@ -100,6 +100,7 @@ const RegisterGuide = ({ onRegisterSuccess, onCancel }) => {
     const [authError, setAuthError] = useState('');
     const [activeTab, setActiveTab] = useState('overview'); // 'overview', 'edit_profile', 'verification', 'gallery'
     const [guidePosts, setGuidePosts] = useState([]);
+    const [postCarouselIndices, setPostCarouselIndices] = useState({});
 
     // =============================================
     // Auto-fetch profile on Clerk login
@@ -167,22 +168,60 @@ const RegisterGuide = ({ onRegisterSuccess, onCancel }) => {
         }
     };
 
+    const handleNextImage = (postId, totalImages) => {
+        setPostCarouselIndices(prev => {
+            const current = prev[postId] || 0;
+            return {
+                ...prev,
+                [postId]: (current + 1) % totalImages
+            };
+        });
+    };
+
+    const handlePrevImage = (postId, totalImages) => {
+        setPostCarouselIndices(prev => {
+            const current = prev[postId] || 0;
+            return {
+                ...prev,
+                [postId]: (current - 1 + totalImages) % totalImages
+            };
+        });
+    };
+
+    const handleLikePost = async (postId) => {
+        try {
+            const result = await likeGuidePost(postId);
+            setGuidePosts(prev => prev.map(post => 
+                post.id === postId ? { ...post, likesCount: result.likesCount } : post
+            ));
+        } catch (error) {
+            console.error('Failed to like post:', error);
+        }
+    };
+
     const handlePostUpload = async (e) => {
         e.preventDefault();
         const fileInput = e.target.elements.postImage;
         const captionInput = e.target.elements.postCaption;
         const locationInput = e.target.elements.postLocation;
+        const tagsInput = e.target.elements.postTags;
         const files = fileInput.files;
         if (!files || files.length === 0) return;
         
         setIsSubmitting(true);
         try {
-            await uploadGuidePost(guideProfile.id, files, locationInput.value, captionInput.value);
+            await uploadGuidePost(guideProfile.id, files, locationInput.value, captionInput.value, tagsInput ? tagsInput.value : '');
             const posts = await getGuidePosts(guideProfile.id);
             setGuidePosts(posts);
             fileInput.value = "";
             captionInput.value = "";
             locationInput.value = "";
+            if (tagsInput) tagsInput.value = "";
+            const promptElement = document.getElementById('fileUploadPrompt');
+            if (promptElement) {
+                promptElement.textContent = 'Click to select photos';
+                promptElement.style.color = 'var(--lp-text-dark)';
+            }
         } catch (error) {
             console.error('Failed to upload post:', error);
             setAuthError('Failed to upload posts.');
@@ -745,9 +784,15 @@ const RegisterGuide = ({ onRegisterSuccess, onCancel }) => {
                                             <label>Tour Destinations (Images)</label>
                                             <div style={{ background: 'rgba(157, 102, 56, 0.05)', padding: '15px', borderRadius: '8px', border: '1px dashed rgba(157, 102, 56, 0.3)', marginBottom: '10px' }}>
                                                 <input type="file" id="destImageInput" style={{ display: 'none' }} accept="image/*" multiple onChange={handleDestinationImageUpload} />
-                                                <button type="button" onClick={() => document.getElementById('destImageInput').click()} style={{ background: '#fff', border: '1px solid #ccc', padding: '8px 15px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.9rem' }}>
-                                                    + Add Photos
-                                                </button>
+                                                <button 
+                                                     type="button" 
+                                                     onClick={() => document.getElementById('destImageInput').click()} 
+                                                     style={{ background: '#fff', border: '1.5px solid var(--lp-primary)', color: 'var(--lp-primary)', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontSize: '0.9rem', fontWeight: '600', transition: 'all 0.2s' }}
+                                                     onMouseOver={(e) => { e.currentTarget.style.background = 'var(--lp-primary)'; e.currentTarget.style.color = '#fff'; }}
+                                                     onMouseOut={(e) => { e.currentTarget.style.background = '#fff'; e.currentTarget.style.color = 'var(--lp-primary)'; }}
+                                                 >
+                                                     + Add Photos
+                                                 </button>
                                                 <span style={{ marginLeft: '10px', fontSize: '0.85rem', color: '#666' }}>Upload images of locations you take tourists to.</span>
                                             </div>
                                             {guideProfile.destinationImages && guideProfile.destinationImages.split(',').filter(Boolean).length > 0 && (
@@ -896,11 +941,47 @@ const RegisterGuide = ({ onRegisterSuccess, onCancel }) => {
                                         </div>
                                         
                                         <form onSubmit={handlePostUpload} style={{ marginBottom: '40px', background: 'rgba(157, 102, 56, 0.05)', padding: '20px', borderRadius: '12px', border: '1px dashed rgba(157, 102, 56, 0.3)' }}>
-                                            <div className="reg-field">
-                                                <label>Select Photo(s) <span className="req">*</span></label>
-                                                <input type="file" name="postImage" accept="image/*" multiple required style={{ background: '#fff' }} />
-                                                <small style={{ color: '#666', marginTop: '5px', display: 'block' }}>You can select multiple photos at once.</small>
-                                            </div>
+                                            <div className="reg-field" style={{ marginBottom: '20px' }}>
+                                                 <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600 }}>Select Photo(s) <span className="req">*</span></label>
+                                                 <div 
+                                                     style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', border: '2px dashed rgba(157, 102, 56, 0.25)', padding: '28px', borderRadius: '12px', background: '#fff', cursor: 'pointer', transition: 'all 0.2s', textAlign: 'center' }} 
+                                                     onClick={() => document.getElementById('postImageInput').click()}
+                                                     onMouseOver={(e) => e.currentTarget.style.borderColor = 'var(--lp-primary)'}
+                                                     onMouseOut={(e) => e.currentTarget.style.borderColor = 'rgba(157, 102, 56, 0.25)'}
+                                                 >
+                                                     <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--lp-primary)', marginBottom: '8px' }}>
+                                                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                                         <polyline points="17 8 12 3 7 8"/>
+                                                         <line x1="12" y1="3" x2="12" y2="15"/>
+                                                     </svg>
+                                                     <span id="fileUploadPrompt" style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--lp-text-dark)' }}>
+                                                         Click to select photos
+                                                     </span>
+                                                     <span style={{ fontSize: '0.75rem', color: 'var(--lp-text-muted)', marginTop: '4px' }}>
+                                                         You can select multiple files at once (JPG, PNG, WEBP)
+                                                     </span>
+                                                     <input 
+                                                         type="file" 
+                                                         id="postImageInput"
+                                                         name="postImage" 
+                                                         accept="image/*" 
+                                                         multiple 
+                                                         required 
+                                                         style={{ display: 'none' }} 
+                                                         onChange={(e) => {
+                                                             const files = e.target.files;
+                                                             const prompt = document.getElementById('fileUploadPrompt');
+                                                             if (files && files.length > 0) {
+                                                                 prompt.textContent = `${files.length} photo(s) selected`;
+                                                                 prompt.style.color = 'var(--lp-primary)';
+                                                             } else {
+                                                                 prompt.textContent = 'Click to select photos';
+                                                                 prompt.style.color = 'var(--lp-text-dark)';
+                                                             }
+                                                         }}
+                                                     />
+                                                 </div>
+                                             </div>
                                             <div className="reg-row">
                                                 <div className="reg-field">
                                                     <label>Location (Optional)</label>
@@ -910,6 +991,10 @@ const RegisterGuide = ({ onRegisterSuccess, onCancel }) => {
                                                     <label>Caption (Optional)</label>
                                                     <input type="text" name="postCaption" placeholder="E.g., Sunrise tour" style={{ background: '#fff' }} />
                                                 </div>
+                                                <div className="reg-field">
+                                                    <label>Tags (Optional)</label>
+                                                    <input type="text" name="postTags" placeholder="E.g., hiking, history, culture" style={{ background: '#fff' }} />
+                                                </div>
                                             </div>
                                             <button type="submit" className="reg-submit-btn" disabled={isSubmitting} style={{ marginTop: '10px' }}>
                                                 {isSubmitting ? 'Uploading...' : 'Upload Photos'}
@@ -917,26 +1002,136 @@ const RegisterGuide = ({ onRegisterSuccess, onCancel }) => {
                                         </form>
 
                                         {guidePosts && guidePosts.length > 0 ? (
-                                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '20px' }}>
-                                                {guidePosts.map(post => (
-                                                    <div key={post.id} style={{ borderRadius: '12px', overflow: 'hidden', border: '1.5px solid rgba(157, 102, 56, 0.1)', background: '#fff', position: 'relative' }}>
-                                                        <img src={`http://localhost:8080/api/guides/files/${post.imageUrl}`} alt="Post" style={{ width: '100%', height: '250px', objectFit: 'cover' }} />
-                                                        {post.location && (
-                                                            <div style={{ position: 'absolute', top: '10px', left: '10px', background: 'rgba(0,0,0,0.6)', color: '#fff', padding: '4px 10px', borderRadius: '20px', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
-                                                                    <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
-                                                                    <circle cx="12" cy="10" r="3"/>
-                                                                </svg>
-                                                                {post.location}
+                                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(285px, 1fr))', gap: '24px' }}>
+                                                {guidePosts.map(post => {
+                                                    const imageUrlsStr = post.imageUrls || post.imageUrl || "";
+                                                    const images = imageUrlsStr ? imageUrlsStr.split(',').filter(Boolean) : [];
+                                                    const activeIndex = postCarouselIndices[post.id] || 0;
+                                                    const currentImage = images[activeIndex];
+                                                    
+                                                    return (
+                                                        <div key={post.id} style={{ borderRadius: '12px', overflow: 'hidden', border: '1px solid rgba(157, 102, 56, 0.12)', background: '#fff', boxShadow: '0 4px 12px rgba(157, 102, 56, 0.04)', display: 'flex', flexDirection: 'column' }}>
+                                                            {/* Post Header */}
+                                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 14px', borderBottom: '1px solid rgba(157, 102, 56, 0.08)' }}>
+                                                                {post.location ? (
+                                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--lp-primary)', fontSize: '0.85rem', fontWeight: 600 }}>
+                                                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                                                                            <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
+                                                                            <circle cx="12" cy="10" r="3"/>
+                                                                        </svg>
+                                                                        <span>{post.location}</span>
+                                                                    </div>
+                                                                ) : (
+                                                                    <div style={{ color: 'var(--lp-text-muted)', fontSize: '0.85rem' }}>Experience Trip</div>
+                                                                )}
+                                                                <span style={{ fontSize: '0.75rem', color: 'var(--lp-text-muted)' }}>
+                                                                    {post.createdAt ? new Date(post.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : ''}
+                                                                </span>
                                                             </div>
-                                                        )}
-                                                        {post.caption && (
-                                                            <div style={{ padding: '10px', fontSize: '0.9rem', color: '#555' }}>
-                                                                {post.caption}
+
+                                                            {/* Post Image Slide */}
+                                                            <div style={{ position: 'relative', width: '100%', height: '280px', background: '#f5f5f5', overflow: 'hidden' }}>
+                                                                {currentImage ? (
+                                                                    <img 
+                                                                        src={`http://localhost:8080/api/guides/files/${currentImage}`} 
+                                                                        alt="Post Slide" 
+                                                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                                                                    />
+                                                                ) : (
+                                                                    <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#999' }}>No Image</div>
+                                                                )}
+
+                                                                {images.length > 1 && (
+                                                                    <>
+                                                                        <button 
+                                                                            type="button" 
+                                                                            onClick={(e) => { e.stopPropagation(); handlePrevImage(post.id, images.length); }}
+                                                                            style={{
+                                                                                position: 'absolute', top: '50%', left: '10px', transform: 'translateY(-50%)',
+                                                                                background: 'rgba(255, 255, 255, 0.8)', border: 'none', borderRadius: '50%',
+                                                                                width: '28px', height: '28px', cursor: 'pointer', display: 'flex', alignItems: 'center',
+                                                                                justifyContent: 'center', color: '#333', boxShadow: '0 2px 4px rgba(0,0,0,0.15)',
+                                                                                zIndex: 2
+                                                                            }}
+                                                                        >
+                                                                            ←
+                                                                        </button>
+                                                                        <button 
+                                                                            type="button" 
+                                                                            onClick={(e) => { e.stopPropagation(); handleNextImage(post.id, images.length); }}
+                                                                            style={{
+                                                                                position: 'absolute', top: '50%', right: '10px', transform: 'translateY(-50%)',
+                                                                                background: 'rgba(255, 255, 255, 0.8)', border: 'none', borderRadius: '50%',
+                                                                                width: '28px', height: '28px', cursor: 'pointer', display: 'flex', alignItems: 'center',
+                                                                                justifyContent: 'center', color: '#333', boxShadow: '0 2px 4px rgba(0,0,0,0.15)',
+                                                                                zIndex: 2
+                                                                            }}
+                                                                        >
+                                                                            →
+                                                                        </button>
+                                                                        <div style={{
+                                                                            position: 'absolute', bottom: '12px', left: '0', right: '0', display: 'flex',
+                                                                            justifyContent: 'center', gap: '6px', zIndex: 2
+                                                                        }}>
+                                                                            {images.map((_, idx) => (
+                                                                                <span 
+                                                                                    key={idx}
+                                                                                    style={{
+                                                                                        width: '6px', height: '6px', borderRadius: '50%',
+                                                                                        background: idx === activeIndex ? '#FF653F' : 'rgba(255, 255, 255, 0.6)',
+                                                                                        transition: 'background 0.2s'
+                                                                                    }}
+                                                                                />
+                                                                            ))}
+                                                                        </div>
+                                                                    </>
+                                                                )}
                                                             </div>
-                                                        )}
-                                                    </div>
-                                                ))}
+
+                                                            {/* Post Footer */}
+                                                            <div style={{ padding: '12px 14px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                                                                {/* Likes Actions */}
+                                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                                                                    <button 
+                                                                        type="button"
+                                                                        onClick={() => handleLikePost(post.id)}
+                                                                        style={{
+                                                                            background: 'none', border: 'none', padding: 0, cursor: 'pointer',
+                                                                            display: 'flex', alignItems: 'center', gap: '6px', color: '#ff4d4d'
+                                                                        }}
+                                                                    >
+                                                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                                            <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+                                                                        </svg>
+                                                                        <span style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--lp-text-dark)' }}>{post.likesCount || 0}</span>
+                                                                    </button>
+                                                                </div>
+
+                                                                {/* Caption */}
+                                                                {post.caption && (
+                                                                    <p style={{ margin: '0 0 10px 0', fontSize: '0.9rem', lineHeight: '1.45', color: 'var(--lp-text-dark)' }}>
+                                                                        {post.caption}
+                                                                    </p>
+                                                                )}
+
+                                                                {/* Tags */}
+                                                                {post.tags && post.tags.trim() && (
+                                                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: 'auto' }}>
+                                                                        {post.tags.split(',').map((tag, tIdx) => {
+                                                                            const cleanTag = tag.trim().replace(/^#/, '');
+                                                                            if (!cleanTag) return null;
+                                                                            return (
+                                                                                <span key={tIdx} style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--lp-primary)', background: 'rgba(157, 102, 56, 0.08)', padding: '2px 8px', borderRadius: '4px' }}>
+                                                                                    #{cleanTag}
+                                                                                </span>
+                                                                            );
+                                                                        })}
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
                                             </div>
                                         ) : (
                                             <div style={{ textAlign: 'center', padding: '40px 0', color: '#777' }}>
