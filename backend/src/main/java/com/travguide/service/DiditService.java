@@ -28,6 +28,7 @@ public class DiditService {
      * @param vendorData A unique identifier for the user (e.g., guide email)
      * @return Map containing "url" (for SDK) and "session_id"
      */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public Map<String, String> createSession(String vendorData) {
         String url = apiUrl + "/v3/session/";
 
@@ -54,6 +55,7 @@ public class DiditService {
         return result;
     }
 
+    @SuppressWarnings("rawtypes")
     public String getSessionUrl(String sessionId) {
         try {
             String url = apiUrl + "/v3/session/" + sessionId + "/";
@@ -76,6 +78,7 @@ public class DiditService {
         }
         return null;
     }
+    @SuppressWarnings("rawtypes")
     public String getSessionStatus(String sessionId) {
         try {
             // First hit the session endpoint itself
