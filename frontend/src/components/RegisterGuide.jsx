@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { createGuide, updateGuide, getGuideByEmail, createVerificationSession, getVerificationStatus, resetVerification, uploadProfilePicture, uploadGuidePost, getGuidePosts, uploadDestinationImages, deleteDestinationImage, likeGuidePost } from '../api/guideApi';
+import { createGuide, updateGuide, getGuideByEmail, createVerificationSession, getVerificationStatus, resetVerification, uploadProfilePicture, uploadGuidePost, getGuidePosts, uploadDestinationImages, deleteDestinationImage, likeGuidePost, deleteGuidePost, editGuidePost } from '../api/guideApi';
 import { useSignUp, useSignIn, useAuth, useUser } from '@clerk/clerk-react';
 import { DiditSdk } from '@didit-protocol/sdk-web';
 import travGuideLogo from '../assets/TravGuideLogo.png';
@@ -101,6 +101,8 @@ const RegisterGuide = ({ onRegisterSuccess, onCancel }) => {
     const [activeTab, setActiveTab] = useState('overview'); // 'overview', 'edit_profile', 'verification', 'gallery'
     const [guidePosts, setGuidePosts] = useState([]);
     const [postCarouselIndices, setPostCarouselIndices] = useState({});
+    const [editingPostId, setEditingPostId] = useState(null);
+    const [editForm, setEditForm] = useState({ caption: '', location: '', tags: '' });
 
     // =============================================
     // Auto-fetch profile on Clerk login
@@ -196,6 +198,44 @@ const RegisterGuide = ({ onRegisterSuccess, onCancel }) => {
             ));
         } catch (error) {
             console.error('Failed to like post:', error);
+        }
+    };
+
+    const handleDeletePost = async (postId) => {
+        if (!window.confirm("Are you sure you want to delete this post?")) return;
+        try {
+            await deleteGuidePost(postId);
+            setGuidePosts(prev => prev.filter(post => post.id !== postId));
+        } catch (error) {
+            console.error('Failed to delete post:', error);
+            setAuthError('Failed to delete post.');
+        }
+    };
+
+    const handleStartEditPost = (post) => {
+        setEditingPostId(post.id);
+        setEditForm({
+            caption: post.caption || '',
+            location: post.location || '',
+            tags: post.tags || ''
+        });
+    };
+
+    const handleCancelEditPost = () => {
+        setEditingPostId(null);
+        setEditForm({ caption: '', location: '', tags: '' });
+    };
+
+    const handleSaveEditPost = async (postId) => {
+        try {
+            const updatedPost = await editGuidePost(postId, editForm);
+            setGuidePosts(prev => prev.map(post => 
+                post.id === postId ? { ...post, caption: updatedPost.caption, location: updatedPost.location, tags: updatedPost.tags } : post
+            ));
+            setEditingPostId(null);
+        } catch (error) {
+            console.error('Failed to save post edits:', error);
+            setAuthError('Failed to save post edits.');
         }
     };
 
@@ -1013,7 +1053,7 @@ const RegisterGuide = ({ onRegisterSuccess, onCancel }) => {
                                                         <div key={post.id} style={{ borderRadius: '12px', overflow: 'hidden', border: '1px solid rgba(157, 102, 56, 0.12)', background: '#fff', boxShadow: '0 4px 12px rgba(157, 102, 56, 0.04)', display: 'flex', flexDirection: 'column' }}>
                                                             {/* Post Header */}
                                                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 14px', borderBottom: '1px solid rgba(157, 102, 56, 0.08)' }}>
-                                                                {post.location ? (
+                                                                {post.location && editingPostId !== post.id ? (
                                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--lp-primary)', fontSize: '0.85rem', fontWeight: 600 }}>
                                                                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
                                                                             <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
@@ -1022,11 +1062,42 @@ const RegisterGuide = ({ onRegisterSuccess, onCancel }) => {
                                                                         <span>{post.location}</span>
                                                                     </div>
                                                                 ) : (
-                                                                    <div style={{ color: 'var(--lp-text-muted)', fontSize: '0.85rem' }}>Experience Trip</div>
+                                                                    <div style={{ color: 'var(--lp-text-muted)', fontSize: '0.85rem' }}>
+                                                                        {editingPostId === post.id ? 'Editing Post...' : 'Experience Trip'}
+                                                                    </div>
                                                                 )}
-                                                                <span style={{ fontSize: '0.75rem', color: 'var(--lp-text-muted)' }}>
-                                                                    {post.createdAt ? new Date(post.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : ''}
-                                                                </span>
+                                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                                    {editingPostId !== post.id && (
+                                                                        <>
+                                                                            {/* Edit Button */}
+                                                                            <button 
+                                                                                type="button" 
+                                                                                onClick={() => handleStartEditPost(post)}
+                                                                                style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: 'var(--lp-text-muted)', display: 'flex', alignItems: 'center' }}
+                                                                            >
+                                                                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                                                    <path d="M12 20h9"/>
+                                                                                    <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>
+                                                                                </svg>
+                                                                            </button>
+                                                                            {/* Delete Button */}
+                                                                            <button 
+                                                                                type="button" 
+                                                                                onClick={() => handleDeletePost(post.id)}
+                                                                                style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: '#ff4d4d', display: 'flex', alignItems: 'center' }}
+                                                                            >
+                                                                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                                                    <path d="M3 6h18"/>
+                                                                                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                                                                                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                                                                                </svg>
+                                                                            </button>
+                                                                        </>
+                                                                    )}
+                                                                    <span style={{ fontSize: '0.75rem', color: 'var(--lp-text-muted)' }}>
+                                                                        {post.createdAt ? new Date(post.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : ''}
+                                                                    </span>
+                                                                </div>
                                                             </div>
 
                                                             {/* Post Image Slide */}
@@ -1089,44 +1160,98 @@ const RegisterGuide = ({ onRegisterSuccess, onCancel }) => {
                                                             </div>
 
                                                             {/* Post Footer */}
-                                                            <div style={{ padding: '12px 14px', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                                                                {/* Likes Actions */}
-                                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                                                                    <button 
-                                                                        type="button"
-                                                                        onClick={() => handleLikePost(post.id)}
-                                                                        style={{
-                                                                            background: 'none', border: 'none', padding: 0, cursor: 'pointer',
-                                                                            display: 'flex', alignItems: 'center', gap: '6px', color: '#ff4d4d'
-                                                                        }}
-                                                                    >
-                                                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                                            <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
-                                                                        </svg>
-                                                                        <span style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--lp-text-dark)' }}>{post.likesCount || 0}</span>
-                                                                    </button>
-                                                                </div>
+                                                            <div style={{ padding: '12px 14px', flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                                                {editingPostId === post.id ? (
+                                                                    <>
+                                                                        {/* Location Edit */}
+                                                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                                                            <label style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--lp-text-muted)' }}>Location</label>
+                                                                            <input 
+                                                                                type="text" 
+                                                                                value={editForm.location}
+                                                                                onChange={(e) => setEditForm(prev => ({ ...prev, location: e.target.value }))}
+                                                                                style={{ width: '100%', padding: '6px 10px', fontSize: '0.85rem', borderRadius: '6px', border: '1px solid rgba(157, 102, 56, 0.2)', background: '#fff' }}
+                                                                            />
+                                                                        </div>
+                                                                        {/* Caption Edit */}
+                                                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                                                            <label style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--lp-text-muted)' }}>Caption</label>
+                                                                            <textarea 
+                                                                                rows="2"
+                                                                                value={editForm.caption}
+                                                                                onChange={(e) => setEditForm(prev => ({ ...prev, caption: e.target.value }))}
+                                                                                style={{ width: '100%', padding: '6px 10px', fontSize: '0.85rem', borderRadius: '6px', border: '1px solid rgba(157, 102, 56, 0.2)', background: '#fff', resize: 'vertical' }}
+                                                                            />
+                                                                        </div>
+                                                                        {/* Tags Edit */}
+                                                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                                                            <label style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--lp-text-muted)' }}>Tags (comma-separated)</label>
+                                                                            <input 
+                                                                                type="text" 
+                                                                                value={editForm.tags}
+                                                                                onChange={(e) => setEditForm(prev => ({ ...prev, tags: e.target.value }))}
+                                                                                style={{ width: '100%', padding: '6px 10px', fontSize: '0.85rem', borderRadius: '6px', border: '1px solid rgba(157, 102, 56, 0.2)', background: '#fff' }}
+                                                                            />
+                                                                        </div>
+                                                                        {/* Action Buttons */}
+                                                                        <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+                                                                            <button 
+                                                                                type="button" 
+                                                                                onClick={() => handleSaveEditPost(post.id)}
+                                                                                style={{ flex: 1, padding: '6px 0', fontSize: '0.85rem', fontWeight: '600', color: '#fff', background: 'var(--lp-primary)', border: 'none', borderRadius: '6px', cursor: 'pointer' }}
+                                                                            >
+                                                                                Save
+                                                                            </button>
+                                                                            <button 
+                                                                                type="button" 
+                                                                                onClick={handleCancelEditPost}
+                                                                                style={{ flex: 1, padding: '6px 0', fontSize: '0.85rem', fontWeight: '600', color: 'var(--lp-text-dark)', background: '#eee', border: 'none', borderRadius: '6px', cursor: 'pointer' }}
+                                                                            >
+                                                                                Cancel
+                                                                            </button>
+                                                                        </div>
+                                                                    </>
+                                                                ) : (
+                                                                    <>
+                                                                        {/* Likes Actions */}
+                                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                                                                            <button 
+                                                                                type="button"
+                                                                                onClick={() => handleLikePost(post.id)}
+                                                                                style={{
+                                                                                    background: 'none', border: 'none', padding: 0, cursor: 'pointer',
+                                                                                    display: 'flex', alignItems: 'center', gap: '6px', color: '#ff4d4d'
+                                                                                }}
+                                                                            >
+                                                                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                                                    <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+                                                                                </svg>
+                                                                                <span style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--lp-text-dark)' }}>{post.likesCount || 0}</span>
+                                                                            </button>
+                                                                        </div>
 
-                                                                {/* Caption */}
-                                                                {post.caption && (
-                                                                    <p style={{ margin: '0 0 10px 0', fontSize: '0.9rem', lineHeight: '1.45', color: 'var(--lp-text-dark)' }}>
-                                                                        {post.caption}
-                                                                    </p>
-                                                                )}
+                                                                        {/* Caption */}
+                                                                        {post.caption && (
+                                                                            <p style={{ margin: '0 0 10px 0', fontSize: '0.9rem', lineHeight: '1.45', color: 'var(--lp-text-dark)' }}>
+                                                                                {post.caption}
+                                                                            </p>
+                                                                        )}
 
-                                                                {/* Tags */}
-                                                                {post.tags && post.tags.trim() && (
-                                                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: 'auto' }}>
-                                                                        {post.tags.split(',').map((tag, tIdx) => {
-                                                                            const cleanTag = tag.trim().replace(/^#/, '');
-                                                                            if (!cleanTag) return null;
-                                                                            return (
-                                                                                <span key={tIdx} style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--lp-primary)', background: 'rgba(157, 102, 56, 0.08)', padding: '2px 8px', borderRadius: '4px' }}>
-                                                                                    #{cleanTag}
-                                                                                </span>
-                                                                            );
-                                                                        })}
-                                                                    </div>
+                                                                        {/* Tags */}
+                                                                        {post.tags && post.tags.trim() && (
+                                                                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: 'auto' }}>
+                                                                                {post.tags.split(',').map((tag, tIdx) => {
+                                                                                    const cleanTag = tag.trim().replace(/^#/, '');
+                                                                                    if (!cleanTag) return null;
+                                                                                    return (
+                                                                                        <span key={tIdx} style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--lp-primary)', background: 'rgba(157, 102, 56, 0.08)', padding: '2px 8px', borderRadius: '4px' }}>
+                                                                                            #{cleanTag}
+                                                                                        </span>
+                                                                                    );
+                                                                                })}
+                                                                            </div>
+                                                                        )}
+                                                                    </>
                                                                 )}
                                                             </div>
                                                         </div>

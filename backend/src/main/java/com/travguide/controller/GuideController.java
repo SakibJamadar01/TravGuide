@@ -216,6 +216,30 @@ public class GuideController {
         }).orElse(ResponseEntity.notFound().build());
     }
 
+    // Delete a gallery post
+    @DeleteMapping("/posts/{postId}")
+    public ResponseEntity<?> deletePost(@PathVariable Long postId) {
+        return guidePostRepository.findById(postId).map(post -> {
+            guidePostRepository.delete(post);
+            return ResponseEntity.ok(Map.of("message", "Post deleted successfully"));
+        }).orElse(ResponseEntity.notFound().build());
+    }
+
+    // Edit a gallery post (caption, location, tags)
+    @PutMapping("/posts/{postId}")
+    public ResponseEntity<?> editPost(
+            @PathVariable Long postId,
+            @RequestBody Map<String, String> payload) {
+            
+        return guidePostRepository.findById(postId).map(post -> {
+            if (payload.containsKey("caption")) post.setCaption(payload.get("caption"));
+            if (payload.containsKey("location")) post.setLocation(payload.get("location"));
+            if (payload.containsKey("tags")) post.setTags(payload.get("tags"));
+            guidePostRepository.save(post);
+            return ResponseEntity.ok(post);
+        }).orElse(ResponseEntity.notFound().build());
+    }
+
     // Upload destination images
     @PostMapping("/{id}/upload-destination-images")
     public ResponseEntity<?> uploadDestinationImages(@PathVariable Long id, @RequestParam("files") MultipartFile[] files) {

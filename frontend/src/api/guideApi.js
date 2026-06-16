@@ -105,6 +105,16 @@ export const likeGuidePost = async (postId) => {
     return response.data;
 };
 
+export const deleteGuidePost = async (postId) => {
+    const response = await api.delete(`/guides/posts/${postId}`);
+    return response.data;
+};
+
+export const editGuidePost = async (postId, postData) => {
+    const response = await api.put(`/guides/posts/${postId}`, postData);
+    return response.data;
+};
+
 export const uploadDestinationImages = async (guideId, files) => {
     const formData = new FormData();
     for (let i = 0; i < files.length; i++) {
