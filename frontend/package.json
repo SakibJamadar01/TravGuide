@@ -11,11 +11,14 @@
   },
   "dependencies": {
     "@clerk/clerk-react": "^5.61.7",
-    "@vis.gl/react-google-maps": "^1.8.3",
+    "@didit-protocol/sdk-web": "^0.2.1",
     "aws-amplify": "^6.16.4",
     "axios": "^1.15.2",
+    "leaflet": "^1.9.4",
+    "leaflet-geosearch": "^4.4.0",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
+    "react-leaflet": "^5.0.0",
     "tslib": "^2.8.1"
   },
   "devDependencies": {

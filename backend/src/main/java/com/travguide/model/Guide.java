@@ -33,6 +33,11 @@ public class Guide {
     @Enumerated(EnumType.STRING)
     private VerificationStatus verificationStatus = VerificationStatus.PENDING;
 
+    private String diditSessionId;
+
+    @Column(length = 1000)
+    private String diditSessionUrl;
+
     // Step 3: Guide Profile
     private String city;
 
@@ -43,6 +48,21 @@ public class Guide {
     private Double rating;
     private Double latitude;
     private Double longitude;
+
+    // Step 4: Trip & Service Details
+    private Integer tripDurationDays;
+    
+    @Column(length = 1000)
+    private String locationsShown;
+    
+    @Column(length = 1000)
+    private String servicesProvided;
+
+    @Column(length = 500)
+    private String profilePictureUrl;
+
+    @Column(length = 2000)
+    private String destinationImages; // comma separated file URLs
 
     public enum VerificationStatus {
         PENDING,

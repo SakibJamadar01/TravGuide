@@ -11,6 +11,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface GuideRepository extends JpaRepository<Guide, Long> {
     List<Guide> findByCityContainingIgnoreCase(String city);
-    Optional<Guide> findByEmail(String email);
+    Optional<Guide> findFirstByEmail(String email);
 }
 

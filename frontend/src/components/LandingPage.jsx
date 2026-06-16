@@ -23,7 +23,12 @@ const LandingPage = ({ onSelectMode }) => {
                 <div className="hero-orb hero-orb-1"></div>
                 <div className="hero-orb hero-orb-2"></div>
                 <div className="hero-content">
-                    <span className="hero-badge">✨ Connect with verified local experts</span>
+                    <span className="hero-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#FF653F' }}>
+                            <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275Z"/>
+                        </svg>
+                        Connect with verified local experts
+                    </span>
                     <h1>Discover the World<br />Through Local Eyes</h1>
                     <p>
                         Skip the tourist traps. Find verified local guides to unlock authentic 
@@ -138,22 +143,40 @@ const LandingPage = ({ onSelectMode }) => {
                 </div>
                 <div className="features-grid">
                     <div className="feature-item">
-                        <div className="feature-icon">🗺️</div>
+                        <div className="feature-icon" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M14.106 5.553a2 2 0 0 0-1.788 0l-3.659 1.83a2 2 0 0 1-1.788 0L3 5v14l3.659 1.83a2 2 0 0 0 1.788 0l3.659-1.83a2 2 0 0 1 1.788 0L21 19V5z"/>
+                                <path d="M9 6.75v13.5"/>
+                                <path d="M15 3.75v13.5"/>
+                            </svg>
+                        </div>
                         <h4>Map-Based Interface</h4>
                         <p>Locate guides instantly via location-pinned interactive maps. Select guides nearest to your accommodation or interests.</p>
                     </div>
                     <div className="feature-item">
-                        <div className="feature-icon">🛡️</div>
+                        <div className="feature-icon" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M20 13c0 5-3.5 7.5-7.66 9.7a1 1 0 0 1-.68 0C7.5 20.5 4 18 4 13V6a1 1 0 0 1 .76-.97l8-2a1 1 0 0 1 .48 0l8 2A1 1 0 0 1 20 6z"/>
+                            </svg>
+                        </div>
                         <h4>Verified Profiles</h4>
                         <p>Our admins perform document checks and selfie matches to verify each guide before letting them appear on the search map.</p>
                     </div>
                     <div className="feature-item">
-                        <div className="feature-icon">💬</div>
+                        <div className="feature-icon" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                            </svg>
+                        </div>
                         <h4>Direct Booking</h4>
                         <p>No high booking agency fees. Communicate directly with your selected guide and pay them transparently.</p>
                     </div>
                     <div className="feature-item">
-                        <div className="feature-icon">⭐</div>
+                        <div className="feature-icon" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                            </svg>
+                        </div>
                         <h4>Reviews & Ratings</h4>
                         <p>Read transparent feedback from other travelers to choose a guide who matches your style and language.</p>
                     </div>

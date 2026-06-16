@@ -37,6 +37,10 @@ Desktop.ini
 node_modules/
 dist/
 
-#Folder
+# Folder
 Img/
 fonts/
+
+# TravGuide specific ignores
+backend/src/main/resources/application.properties
+backend/uploads/

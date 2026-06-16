@@ -2,21 +2,21 @@ spring.application.name=TravGuide
 
 # MySQL Connection Details
 spring.datasource.url=jdbc:mysql://localhost:3306/travguide_db?createDatabaseIfNotExist=true
-spring.datasource.username=${DB_USERNAME:root}
-spring.datasource.password=${DB_PASSWORD:}
+spring.datasource.username=root
+spring.datasource.password=YOUR_DB_PASSWORD
 spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
 
-# Hibernate settings (This automatically creates your tables in SQL)
+# Hibernate settings
 spring.jpa.hibernate.ddl-auto=update
 spring.jpa.show-sql=true
 spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQLDialect
 
 # File Upload Settings
-spring.servlet.multipart.max-file-size=50MB
-spring.servlet.multipart.max-request-size=55MB
+spring.servlet.multipart.max-file-size=5MB
+spring.servlet.multipart.max-request-size=10MB
 file.upload-dir=uploads
 
 # Didit Identity Verification
-didit.api-key=${DIDIT_API_KEY:YOUR_DIDIT_API_KEY}
-didit.workflow-id=${DIDIT_WORKFLOW_ID:YOUR_DIDIT_WORKFLOW_ID}
+didit.api-key=YOUR_DIDIT_API_KEY
+didit.workflow-id=YOUR_DIDIT_WORKFLOW_ID
 didit.api-url=https://verification.didit.me

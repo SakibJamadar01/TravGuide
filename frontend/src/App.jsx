@@ -5,6 +5,7 @@ import GuideList from './components/GuideList';
 import GuideMap from './components/GuideMap';
 import RegisterGuide from './components/RegisterGuide';
 import LandingPage from './components/LandingPage';
+import travGuideLogo from './assets/TravGuideLogo.png';
 
 function App() {
     const [currentView, setCurrentView] = useState('landing');
@@ -58,8 +59,9 @@ function App() {
             {/* Top Bar */}
             <header className="top-bar">
                 <div className="top-bar-left">
-                    <div className="logo-mini" onClick={() => setCurrentView('landing')}>
-                        🌍 TravGuide
+                    <div className="logo-mini" onClick={() => setCurrentView('landing')} style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                        <img src={travGuideLogo} alt="TravGuide Logo" style={{ height: '36px' }} />
+                        <span style={{ fontFamily: 'Chillax, sans-serif', fontWeight: '800', fontSize: '1.4rem', letterSpacing: '-0.5px', color: 'var(--lp-text-dark)' }}>TravGuide</span>
                     </div>
                 </div>
 
