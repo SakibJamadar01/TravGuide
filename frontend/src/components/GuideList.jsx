@@ -104,10 +104,21 @@ const GuideList = ({ guides, loading, selectedId, onSelect }) => {
                         {(guide.locationsShown || guide.servicesProvided) && (
                             <div className="card-preview-tags">
                                 {guide.locationsShown && guide.locationsShown.split(',').slice(0, 2).map((loc, idx) => (
-                                    <span key={`loc-${idx}`} className="card-preview-tag location-tag">📍 {loc.trim()}</span>
+                                    <span key={`loc-${idx}`} className="card-preview-tag location-tag" style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                                            <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
+                                            <circle cx="12" cy="10" r="3"/>
+                                        </svg>
+                                        {loc.trim()}
+                                    </span>
                                 ))}
                                 {guide.servicesProvided && guide.servicesProvided.split(',').slice(0, 2).map((service, idx) => (
-                                    <span key={`srv-${idx}`} className="card-preview-tag">⚡ {service.trim()}</span>
+                                    <span key={`srv-${idx}`} className="card-preview-tag" style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                                            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                                        </svg>
+                                        {service.trim()}
+                                    </span>
                                 ))}
                             </div>
                         )}
