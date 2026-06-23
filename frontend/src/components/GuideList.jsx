@@ -99,6 +99,19 @@ const GuideList = ({ guides, loading, selectedId, onSelect }) => {
                         <p className="card-bio" style={{ textOverflow: 'ellipsis', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
                             {guide.bio}
                         </p>
+                        
+                        {/* Preview tags for locations and services */}
+                        {(guide.locationsShown || guide.servicesProvided) && (
+                            <div className="card-preview-tags">
+                                {guide.locationsShown && guide.locationsShown.split(',').slice(0, 2).map((loc, idx) => (
+                                    <span key={`loc-${idx}`} className="card-preview-tag location-tag">📍 {loc.trim()}</span>
+                                ))}
+                                {guide.servicesProvided && guide.servicesProvided.split(',').slice(0, 2).map((service, idx) => (
+                                    <span key={`srv-${idx}`} className="card-preview-tag">⚡ {service.trim()}</span>
+                                ))}
+                            </div>
+                        )}
+
                         <div className="card-bottom">
                             <span className="card-price">${guide.pricePerDay}<span> / day</span></span>
                             <button className="card-contact-btn">Explore</button>

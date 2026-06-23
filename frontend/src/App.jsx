@@ -67,6 +67,12 @@ function App() {
                 </div>
 
                 <form onSubmit={handleSearch} className="search-form">
+                    <div className="search-icon-wrapper">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                    </div>
                     <input 
                         type="text" 
                         className="search-input"
@@ -103,7 +109,8 @@ function App() {
                     ) : (
                         <>
                             <div className="sidebar-header">
-                                <h2>{guides.length} guides available</h2>
+                                <h2>Explore Guides</h2>
+                                <span className="sidebar-badge">{guides.length} available</span>
                             </div>
                             <div className="sidebar-list">
                                 <GuideList 

@@ -46,18 +46,31 @@ const GuideMap = ({ guides, selectedId, onSelect, center = { lat: 20.5937, lng: 
             }}
           >
             <Popup>
-              <div className="map-popup-card">
-                <h4 style={{ margin: '0 0 6px 0', fontFamily: 'Outfit', color: '#1E104E' }}>{guide.name}</h4>
-                <p style={{ margin: 0, fontSize: '13px', color: '#452E5A', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--lp-primary)', flexShrink: 0 }}>
-                    <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
-                    <circle cx="12" cy="10" r="3"/>
-                  </svg>
-                  {guide.city}
-                </p>
-                <p style={{ margin: '8px 0 0 0', fontWeight: 'bold', color: '#FF653F', fontFamily: 'Outfit' }}>
-                  ${guide.pricePerDay} <span style={{ fontWeight: 400, color: '#999' }}>/ day</span>
-                </p>
+              <div className="map-popup-card" style={{ display: 'flex', gap: '10px', alignItems: 'center', minWidth: '160px', padding: '2px 0' }}>
+                {guide.profilePictureUrl ? (
+                  <img 
+                    src={`http://localhost:8080/api/guides/files/${guide.profilePictureUrl}`} 
+                    alt={guide.name} 
+                    style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(157, 102, 56, 0.15)', flexShrink: 0 }}
+                  />
+                ) : (
+                  <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--lp-primary)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.95rem', fontWeight: '800', flexShrink: 0 }}>
+                    {guide.name ? guide.name.charAt(0).toUpperCase() : 'G'}
+                  </div>
+                )}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <h4 style={{ margin: '0 0 3px 0', fontFamily: 'Outfit', fontSize: '14px', fontWeight: 700, color: '#1E104E', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>{guide.name}</h4>
+                  <p style={{ margin: 0, fontSize: '11px', color: '#6B7280', display: 'flex', alignItems: 'center', gap: '3px' }}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--lp-primary)', flexShrink: 0 }}>
+                      <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
+                      <circle cx="12" cy="10" r="3"/>
+                    </svg>
+                    {guide.city}
+                  </p>
+                  <p style={{ margin: '3px 0 0 0', fontWeight: 'bold', fontSize: '13px', color: '#FF653F', fontFamily: 'Outfit' }}>
+                    ${guide.pricePerDay} <span style={{ fontWeight: 400, color: '#999', fontSize: '10px' }}>/ day</span>
+                  </p>
+                </div>
               </div>
             </Popup>
           </Marker>
