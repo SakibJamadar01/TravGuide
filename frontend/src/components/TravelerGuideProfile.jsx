@@ -223,7 +223,7 @@ const TravelerGuideProfile = ({ guide, onBack }) => {
                                     </div>
 
                                     {/* Post Slide Area */}
-                                    <div style={{ position: 'relative', width: '100%', height: '260px', background: '#f5f5f5', overflow: 'hidden' }}>
+                                    <div style={{ position: 'relative', width: '100%', height: '360px', background: '#f5f5f5', overflow: 'hidden' }}>
                                         {currentImage ? (
                                             isVideoFile(currentImage) ? (
                                                 <video 

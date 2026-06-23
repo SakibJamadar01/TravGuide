@@ -173,7 +173,7 @@ body {
 
 /* Sidebar */
 .sidebar {
-    width: 420px;
+    width: 600px;
     background: #fdfcfa;
     display: flex;
     flex-direction: column;
