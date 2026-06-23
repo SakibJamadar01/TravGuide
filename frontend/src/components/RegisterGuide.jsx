@@ -132,17 +132,22 @@ const RegisterGuide = ({ onRegisterSuccess, onCancel }) => {
                             setGuidePosts(posts);
                         }
                     } catch (error) {
-                        // Clerk authenticated but no guide profile — create one with basic info
-                        console.log("Clerk authenticated, no guide profile found. Creating basic profile...");
-                        try {
-                            const newGuide = await createGuide({
-                                name: user.fullName || `${user.firstName || ''} ${user.lastName || ''}`.trim(),
-                                email: userEmail,
-                            });
-                            setGuideProfile(newGuide);
-                        } catch (createError) {
-                            console.error('Failed to create guide profile:', createError);
-                            setAuthError('Account created but failed to initialize guide profile. Please try signing in again.');
+                        if (error.response && error.response.status === 404) {
+                            // Clerk authenticated but no guide profile — create one with basic info
+                            console.log("Clerk authenticated, no guide profile found. Creating basic profile...");
+                            try {
+                                const newGuide = await createGuide({
+                                    name: user.fullName || `${user.firstName || ''} ${user.lastName || ''}`.trim(),
+                                    email: userEmail,
+                                });
+                                setGuideProfile(newGuide);
+                            } catch (createError) {
+                                console.error('Failed to create guide profile:', createError);
+                                setAuthError('Account created but failed to initialize guide profile. Please try signing in again.');
+                            }
+                        } else {
+                            console.error('Failed to fetch guide profile:', error);
+                            setAuthError('Failed to connect to the backend server. Please verify it is running on port 8080.');
                         }
                     }
                 }

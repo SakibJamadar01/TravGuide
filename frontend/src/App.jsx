@@ -5,6 +5,7 @@ import GuideList from './components/GuideList';
 import GuideMap from './components/GuideMap';
 import RegisterGuide from './components/RegisterGuide';
 import LandingPage from './components/LandingPage';
+import TravelerGuideProfile from './components/TravelerGuideProfile';
 import travGuideLogo from './assets/TravGuideLogo.png';
 
 function App() {
@@ -83,19 +84,37 @@ function App() {
 
             {/* Split Content */}
             <div className="split-content">
-                {/* Left: Guide List */}
+                {/* Left: Guide List / Profile Details */}
                 <aside className="sidebar">
-                    <div className="sidebar-header">
-                        <h2>{guides.length} guides available</h2>
-                    </div>
-                    <div className="sidebar-list">
-                        <GuideList 
-                            guides={guides} 
-                            loading={loading} 
-                            selectedId={selectedId}
-                            onSelect={setSelectedId}
-                        />
-                    </div>
+                    {selectedId ? (
+                        (() => {
+                            const selectedGuide = guides.find(g => g.id === selectedId);
+                            return selectedGuide ? (
+                                <TravelerGuideProfile 
+                                    guide={selectedGuide} 
+                                    onBack={() => setSelectedId(null)} 
+                                />
+                            ) : (
+                                <div style={{ padding: '24px', color: 'var(--lp-text-muted)', fontFamily: 'Outfit, sans-serif' }}>
+                                    Guide details not found.
+                                </div>
+                            );
+                        })()
+                    ) : (
+                        <>
+                            <div className="sidebar-header">
+                                <h2>{guides.length} guides available</h2>
+                            </div>
+                            <div className="sidebar-list">
+                                <GuideList 
+                                    guides={guides} 
+                                    loading={loading} 
+                                    selectedId={selectedId}
+                                    onSelect={setSelectedId}
+                                />
+                            </div>
+                        </>
+                    )}
                 </aside>
 
                 {/* Right: Map */}
